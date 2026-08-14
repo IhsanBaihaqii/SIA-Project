@@ -64,32 +64,6 @@ Selalu ambil perubahan terbaru dari repository terlebih dahulu:
 git pull origin main
 ```
 
-### Setelah Selesai Mengubah Project
-
-Periksa perubahan yang dibuat:
-
-```bash
-git status
-```
-
-Tambahkan perubahan:
-
-```bash
-git add .
-```
-
-Buat commit:
-
-```bash
-git commit -m "Deskripsi perubahan"
-```
-
-Contoh:
-
-```bash
-git commit -m "Menambahkan fitur data produk"
-```
-
 Kemudian push ke branch `main`:
 
 ```bash
