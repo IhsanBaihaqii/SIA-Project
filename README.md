@@ -81,6 +81,10 @@ git commit -m "Deskripsi perubahan"
 git push origin main
 ```
 
+### Jalankan WEb
+
+`http://localhost/SIA-Project/`
+
 > **Catatan:** Selalu lakukan `git pull origin main` sebelum mulai bekerja agar kode lokal tetap mengikuti versi terbaru di repository.
 
 ---
