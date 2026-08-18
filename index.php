@@ -43,13 +43,13 @@
       font-weight: 700;
       letter-spacing: -0.025em;
       line-height: 1.2;
-      color: #1a202c; /* solid dark */
+      color: #1a202c;
       transition: color 0.4s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: inline-block;
       will-change: transform, color;
     }
     .hello-world .world {
-      color: #2563eb; /* solid blue */
+      color: #2563eb;
       transition: color 0.4s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: inline-block;
     }
@@ -65,7 +65,7 @@
     .divider {
       width: 60px;
       height: 4px;
-      background: #2563eb; /* solid */
+      background: #2563eb;
       border-radius: 12px;
       margin: 1.5rem auto 0 auto;
       transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease;
@@ -116,6 +116,56 @@
       animation-play-state: paused;
     }
 
+    /* LINK LOGIN - tambahan baru */
+    .login-link-wrapper {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    .login-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #2563eb;
+      color: white;
+      padding: 0.6rem 1.8rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid transparent;
+    }
+    .login-link:hover {
+      background: #1d4ed8;
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 8px 20px -8px rgba(37, 99, 235, 0.4);
+    }
+    .login-link i {
+      font-size: 1rem;
+    }
+    .login-link .arrow {
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+    .login-link:hover .arrow {
+      transform: translateX(4px);
+    }
+    .login-desc {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.6rem;
+      letter-spacing: 0.3px;
+    }
+    .login-desc span {
+      background: #f1f5f9;
+      padding: 0.1rem 0.6rem;
+      border-radius: 6px;
+      font-family: monospace;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
     /* responsif */
     @media (max-width: 480px) {
       .card {
@@ -131,6 +181,10 @@
       .card:hover .divider {
         width: 72px;
       }
+      .login-link {
+        font-size: 0.85rem;
+        padding: 0.5rem 1.4rem;
+      }
     }
   </style>
 </head>
@@ -145,6 +199,13 @@
       <span class="dot"></span>
       <span class="dot"></span>
       <span class="dot"></span>
+    </div>
+
+    <!-- TAMBAHAN: Link ke Login dengan keterangan -->
+    <div class="login-link-wrapper">
+      <a href="login" class="login-link">
+        Tampilan halaman Login <span class="arrow">→</span>
+      </a>
     </div>
   </div>
 
