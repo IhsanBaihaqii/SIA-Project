@@ -83,9 +83,25 @@ git push origin main
 
 ### Jalankan WEb
 
-`http://localhost/SIA-Project/`
+[http://localhost/SIA-Project/](http://localhost/SIA-Project/)
 
 > **Catatan:** Selalu lakukan `git pull origin main` sebelum mulai bekerja agar kode lokal tetap mengikuti versi terbaru di repository.
+
+---
+
+## Import Database
+
+buat nama database `db_sia` pada `cmd` atau [PHP MyAdmin](http://localhost/phpmyadmin/)
+
+Lalu salin atau import `/database`
+
+### Pada PHP MyAdmin
+
+- buat database `db_sia`
+- Pilih `SQL`
+- Tempel Database dalam format `text`
+- Klik Go atau Kirim
+- Selesai
 
 ---
 
