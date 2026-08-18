@@ -129,6 +129,8 @@
       background: #2563eb;
       color: white;
       padding: 0.6rem 1.8rem;
+      margin: 3px;
+
       border-radius: 9999px;
       font-weight: 500;
       font-size: 0.95rem;
@@ -205,6 +207,11 @@
     <div class="login-link-wrapper">
       <a href="login" class="login-link">
         Tampilan halaman Login <span class="arrow">→</span>
+      </a>
+    </div>
+    <div class="dashboard-link-wrapper">
+      <a href="dashboard" class="login-link">
+        Tampilan halaman Dashboard <span class="arrow">→</span>
       </a>
     </div>
   </div>
