@@ -1,3 +1,3 @@
 <div class="font-bold">
-    Tampilan Transaksi
+    Tampilan Produk
 </div>

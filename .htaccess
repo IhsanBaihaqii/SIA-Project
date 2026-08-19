@@ -1,0 +1,5 @@
+RewriteEngine On
+
+RewriteRule ^dashboard/?$ dashboard/index.php [L]
+
+RewriteRule ^dashboard/(.*)$ dashboard/index.php [L,QSA]
