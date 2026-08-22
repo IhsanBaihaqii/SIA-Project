@@ -1,11 +1,59 @@
 <?php
+
+session_start();
+
 include 'config/koneksi.php';
 
-  session_start();
-  if (isset($_SESSION["login"])) {
-    header("Location: index.php");
+// Jika sudah login, langsung ke dashboard
+if (isset($_SESSION["login"]) && $_SESSION["login"] === true) {
+    header("Location: dashboard/");
     exit;
-  }
+}
+
+$error = "";
+
+// Jika form login dikirim
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $username = trim($_POST["username"] ?? "");
+    $password = $_POST["password"] ?? "";
+
+    if ($username === "" || $password === "") {
+        $error = "Username dan password wajib diisi!";
+    } else {
+
+        // Cari user berdasarkan username
+        $query = "SELECT * FROM tbl_user WHERE username = :username LIMIT 1";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            "username" => $username
+        ]);
+
+        $user = $stmt->fetch();
+
+        // Cek username dan password
+        // if ($user && password_verify($password, $user["password"])) {
+        if (!$user) return;
+        if ($password === $user["password"]) {
+
+            // Buat session
+            $_SESSION["login"] = true;
+            $_SESSION["id_user"] = $user["id"];
+            $_SESSION["username"] = $user["username"];
+            $_SESSION["role"] = $user["role"];
+
+            // Mencegah session fixation
+            session_regenerate_id(true);
+
+            header("Location: index.php");
+            exit;
+
+        } else {
+            $error = "Username atau password salah!";
+        }
+    }
+}
 ?>
 
 <!doctype html>
@@ -200,12 +248,7 @@ include 'config/koneksi.php';
           </div>
           <p class="text-gray-400 text-sm mb-6">Masuk untuk melanjutkan</p>
 
-          <form
-            onsubmit="
-              event.preventDefault();
-              showError();
-            "
-          >
+          <form method="POST" action="">
             <!-- Email / Username -->
             <div class="mb-5">
               <label class="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -214,9 +257,11 @@ include 'config/koneksi.php';
               <div class="input-wrapper relative">
                 <input
                   type="text"
+                  name="username"
                   class="input-field"
-                  placeholder="Masuk email untuk username"
-                  value="kasir@toko.com"
+                  placeholder="Masukkan username"
+                  autocomplete="username"
+                  required
                 />
                 <i class="fa-solid fa-user input-icon"></i>
               </div>
@@ -230,9 +275,11 @@ include 'config/koneksi.php';
               <div class="input-wrapper relative">
                 <input
                   type="password"
+                  name="password"
                   class="input-field"
-                  placeholder="Masuk password"
-                  value="rahasia123"
+                  placeholder="Masukkan password"
+                  autocomplete="current-password"
+                  required
                 />
                 <i class="fa-solid fa-lock input-icon"></i>
               </div>
@@ -259,10 +306,12 @@ include 'config/koneksi.php';
             </button>
 
             <!-- Error message (muncul setelah klik) -->
-            <div id="errorMessage" class="error-msg hidden mt-5">
-              <i class="fa-solid fa-circle-exclamation"></i>
-              <span>Email atau password salah!</span>
-            </div>
+            <?php if ($error !== ""): ?>
+              <div class="error-msg mt-5">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><?= htmlspecialchars($error) ?></span>
+              </div>
+            <?php endif; ?>
 
             <!-- footer kecil -->
             <p
