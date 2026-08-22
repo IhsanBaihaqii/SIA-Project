@@ -1,4 +1,11 @@
 <?php
+// Ini untuk check apakah sudah pernah login?
+session_start();
+if (!isset($_SESSION["login"]) || $_SESSION["login"] !== true) {
+    header("Location: ../login.php");
+    exit;
+}
+
 // ==================================================
 // ROUTING HANDLER
 // ==================================================
@@ -169,10 +176,10 @@ $pageTitle = $router->getPageTitle();
 
             <!-- LOGOUT -->
             <div class="p-4 border-t border-gray-800">
-                <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition">
+                <a href="../logout.php" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
-                </button>
+                </a>
             </div>
         </aside>
 
