@@ -109,6 +109,19 @@ Lalu salin atau import `/database`
 
 Database menggunakan beberapa tabel utama untuk menyimpan data produk dan transaksi.
 
+### 📦 `tbl_users`
+
+Menyimpan data user
+
+| Kolom      | Tipe Data | Keterangan      |
+| ---------- | --------- | --------------- |
+| `id`       | INT (PK)  | Primary Key     |
+| `username` | VARCHAR   | Nama User       |
+| `password` | VARCHAR   | Kategori produk |
+| `role`     | VARCHAR   | Admin, User     |
+
+---
+
 ### 📦 `tbl_products`
 
 Menyimpan data produk.
@@ -189,3 +202,7 @@ Agar tidak terjadi konflik kode:
 3. Gunakan commit message yang jelas.
 4. Jangan menghapus atau mengubah kode anggota lain tanpa koordinasi.
 5. Jika terjadi conflict saat `git pull`, selesaikan conflict terlebih dahulu sebelum melakukan `push`.
+
+Username: `admin`
+
+Password: `admin123`
