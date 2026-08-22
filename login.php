@@ -1,7 +1,5 @@
 <?php
-
 session_start();
-
 include 'config/koneksi.php';
 
 // Jika sudah login, langsung ke dashboard
@@ -12,43 +10,34 @@ if (isset($_SESSION["login"]) && $_SESSION["login"] === true) {
 
 $error = "";
 
-// Jika form login dikirim
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
     $username = trim($_POST["username"] ?? "");
     $password = $_POST["password"] ?? "";
 
     if ($username === "" || $password === "") {
         $error = "Username dan password wajib diisi!";
     } else {
-
-        // Cari user berdasarkan username
         $query = "SELECT * FROM tbl_user WHERE username = :username LIMIT 1";
 
         $stmt = $pdo->prepare($query);
+
         $stmt->execute([
             "username" => $username
         ]);
 
         $user = $stmt->fetch();
 
-        // Cek username dan password
-        // if ($user && password_verify($password, $user["password"])) {
-        if (!$user) return;
-        if ($password === $user["password"]) {
-
-            // Buat session
+        if (!$user) {
+            $error = "Username atau password salah!";
+        } elseif ($password === $user["password"]) {
             $_SESSION["login"] = true;
             $_SESSION["id_user"] = $user["id"];
             $_SESSION["username"] = $user["username"];
             $_SESSION["role"] = $user["role"];
 
-            // Mencegah session fixation
             session_regenerate_id(true);
-
-            header("Location: index.php");
+            header("Location: dashboard/");
             exit;
-
         } else {
             $error = "Username atau password salah!";
         }
