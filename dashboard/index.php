@@ -134,8 +134,8 @@ $pageTitle = $router->getPageTitle();
                 <!-- LOGO -->
                 <div class="p-5 border-b border-gray-800">
                     <h1 class="text-xl font-bold text-yellow-400 flex items-center gap-2">
-                        <i class="fas fa-box"></i>
-                        Stok App
+                        <i class="fas fa-cart-shopping"></i>
+                        SIA KASIR
                     </h1>
                 </div>
 

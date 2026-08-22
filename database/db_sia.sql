@@ -74,6 +74,9 @@ CREATE TABLE `tbl_user` (
   `role` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `tbl_user` (`username`, `password`, `role`)
+VALUES ('admin', 'admin123', 'admin');
+
 --
 -- Indexes for dumped tables
 --
