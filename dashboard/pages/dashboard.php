@@ -7,6 +7,8 @@
 
     // mengubah username menjadi admin
     // username didapatkan dari query diatas (:username) yg ada titik 2 nya
+    // Berarti query berubah menjadi
+    // SELECT * FROM tbl_user WHERE username = 'admin' LIMIT 1
     $stmt->execute([
         "username" => "admin"
     ]);
