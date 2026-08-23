@@ -13,6 +13,7 @@
         "username" => "admin"
     ]);
 
+    // var_dump berfungsi sebagai pengecekan, seperti echo
     var_dump($stmt->fetch());
 
 ?>
