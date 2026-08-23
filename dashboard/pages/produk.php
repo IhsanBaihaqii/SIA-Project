@@ -1,3 +1,3 @@
-<div class="font-bold">
-    Tampilan Produk
-</div>
+<h1>
+    Produk
+</h1>
