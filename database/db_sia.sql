@@ -28,10 +28,12 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `tbl_products` (
-  `id_product` int(11) NOT NULL,
+  `id_product` int(11) NOT NULL AUTO_INCREMENT,
   `nama` varchar(100) NOT NULL,
   `kategori` varchar(100) NOT NULL,
-  `harga` int(11) NOT NULL
+  `harga` int(11) NOT NULL,
+  `stok` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id_product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
