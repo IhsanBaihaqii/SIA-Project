@@ -1,37 +1,28 @@
 <?php
-
 include '../config/koneksi.php';
 
 if (!isset($_GET['id_product'])) {
-    die("ID produk tidak ditemukan");
+    header("Location: index.php?error=" . urlencode("ID produk tidak ditemukan"));
+    exit;
 }
 
 $id = $_GET['id_product'];
 
-$query = "SELECT * FROM tbl_products
-          WHERE id_product = :id";
-
+// Cek apakah produk ada
+$query = "SELECT * FROM tbl_products WHERE id_product = :id";
 $stmt = $pdo->prepare($query);
-
-$stmt->execute([
-    ':id' => $id
-]);
-
+$stmt->execute([':id' => $id]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$product) {
-    die("Produk tidak ditemukan");
+    header("Location: index.php?error=" . urlencode("Produk tidak ditemukan"));
+    exit;
 }
 
-$query = "DELETE FROM tbl_products
-          WHERE id_product = :id";
-
+// Hapus
+$query = "DELETE FROM tbl_products WHERE id_product = :id";
 $stmt = $pdo->prepare($query);
+$stmt->execute([':id' => $id]);
 
-$stmt->execute([
-    ':id' => $id
-]);
-
-header("Location: index.php");
+header("Location: index.php?success=hapus");
 exit;
-?>
