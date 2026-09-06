@@ -1,8 +1,16 @@
 <?php
-// Sertakan layout
-include '../layouts/header.php';
-include '../layouts/sidebar.php';
-include '../layouts/navbar.php';
+    include '../config/koneksi.php';
+
+    $query = "SELECT COUNT(*) AS total_produk FROM tbl_products;";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+
+    $total_produk = $stmt->fetchColumn();
+
+    // Sertakan layout
+    include '../layouts/header.php';
+    include '../layouts/sidebar.php';
+    include '../layouts/navbar.php';
 ?>
 
 <main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
@@ -51,7 +59,7 @@ include '../layouts/navbar.php';
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Produk</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><?php echo $total_produk; ?></p>
                     <span class="inline-flex items-center text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full mt-2">
                         <i class="fa-solid fa-arrow-up mr-1"></i> 3.1%
                     </span>
