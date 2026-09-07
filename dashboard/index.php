@@ -16,7 +16,7 @@
 <main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard  <span class="text-red-400 text-sm">(DATABASE YANG BARU AKU HUBUNGKAN BARU TOTAL_PRODUK, JUMLAH PRODUK SUDAH SESUAI DENGAN DATABASE)</span></h1>
         <p class="text-gray-500 text-sm">Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
     </div>
 

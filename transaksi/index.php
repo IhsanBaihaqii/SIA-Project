@@ -8,7 +8,7 @@ include '../layouts/navbar.php';
     <!-- Header & Tombol Tambah -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Daftar Transaksi</h1>
+            <h1 class="text-2xl font-bold text-gray-800">Daftar Transaksi <span class="text-red-400 text-sm">(MASIH TAMPILAN, BELUM AKU HUBUNGKAN KE DATABASE)</span></h1>
             <p class="text-gray-500 text-sm">Kelola semua data transaksi Anda di sini.</p>
         </div>
         <button class="mt-3 sm:mt-0 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2">
