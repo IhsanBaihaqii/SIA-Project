@@ -109,10 +109,7 @@ CREATE TABLE `tbl_user` (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
--- =========================================================
 -- USER DEFAULT
--- =========================================================
-
 INSERT INTO `tbl_user`
     (`username`, `password`, `role`)
 VALUES
