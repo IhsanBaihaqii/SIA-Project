@@ -123,12 +123,6 @@ CREATE TABLE IF NOT EXISTS `tbl_user` (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
-
--- =========================================================
--- USER ADMIN DEFAULT
--- Tidak akan duplicate jika admin sudah ada
--- =========================================================
-
 INSERT INTO `tbl_user`
 (`username`, `password`, `role`)
 SELECT
