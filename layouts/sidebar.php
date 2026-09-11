@@ -22,6 +22,12 @@
                 </a>
             </li>
             <li>
+                <a href="../pelanggan/index.php" class="flex items-center p-2 rounded-lg hover:bg-blue-400 text-white <?= (strpos($_SERVER['REQUEST_URI'], 'pelanggan') !== false) ? 'bg-blue-500 text-blue-600' : '' ?>">
+                    <i class="fas fa-users w-5 h-5 mr-3"></i>
+                    <span>Pelanggan</span>
+                </a>
+            </li>
+            <li>
                 <a href="../produk/index.php" class="flex items-center p-2 rounded-lg hover:bg-blue-400 text-white <?= (strpos($_SERVER['REQUEST_URI'], 'produk') !== false) ? 'bg-blue-500 text-blue-600' : '' ?>">
                     <i class="fas fa-box w-5 h-5 mr-3"></i>
                     <span>Produk</span>
