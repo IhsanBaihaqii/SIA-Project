@@ -1,8 +1,6 @@
--- =========================================================
--- DATABASE SIA - SAFE VERSION
+-- DATABASE SIA SAYA SAAT INI
 -- Bisa dijalankan tanpa menghapus data yang sudah ada
 -- MariaDB 10.4.32
--- =========================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -16,10 +14,7 @@ USE `db_sia`;
 
 START TRANSACTION;
 
--- =========================================================
 -- TABEL PELANGGAN
--- =========================================================
-
 CREATE TABLE IF NOT EXISTS `tbl_pelanggan` (
     `id_pelanggan` INT(11) NOT NULL AUTO_INCREMENT,
     `nama` VARCHAR(100) NOT NULL,
@@ -33,10 +28,7 @@ DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
 
--- =========================================================
 -- TABEL PRODUK
--- =========================================================
-
 CREATE TABLE IF NOT EXISTS `tbl_products` (
     `id_product` INT(11) NOT NULL AUTO_INCREMENT,
     `nama` VARCHAR(100) NOT NULL,
@@ -50,10 +42,7 @@ DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
 
--- =========================================================
 -- TABEL TRANSAKSI
--- =========================================================
-
 CREATE TABLE IF NOT EXISTS `tbl_transaction` (
     `id_transaction` INT(11) NOT NULL AUTO_INCREMENT,
     `id_pelanggan` INT(11) DEFAULT NULL,
@@ -73,11 +62,7 @@ CREATE TABLE IF NOT EXISTS `tbl_transaction` (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
-
--- =========================================================
 -- DETAIL TRANSAKSI
--- =========================================================
-
 CREATE TABLE IF NOT EXISTS `tbl_transaction_details` (
     `id_transaction_detail` INT(11) NOT NULL AUTO_INCREMENT,
     `id_product` INT(11) NOT NULL,
@@ -106,11 +91,7 @@ CREATE TABLE IF NOT EXISTS `tbl_transaction_details` (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
 
-
--- =========================================================
 -- TABEL USER
--- =========================================================
-
 CREATE TABLE IF NOT EXISTS `tbl_user` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(50) NOT NULL,
@@ -136,11 +117,8 @@ WHERE NOT EXISTS (
 );
 
 
--- =========================================================
 -- DATA PRODUK CONTOH
 -- Tidak akan dimasukkan ulang jika ID sudah ada
--- =========================================================
-
 INSERT INTO `tbl_products`
 (`id_product`, `nama`, `kategori`, `harga`, `stok`)
 SELECT
@@ -170,5 +148,34 @@ WHERE NOT EXISTS (
     WHERE `id_product` = 3
 );
 
+
+-- 1. Tambah kolom harga_pokok (HPP) di tbl_products
+ALTER TABLE `tbl_products`
+    ADD COLUMN `harga_pokok` INT(11) NOT NULL DEFAULT 0 AFTER `harga`;
+
+-- 2. Buat tabel jurnal
+CREATE TABLE IF NOT EXISTS `tbl_journal` (
+    `id_journal` INT(11) NOT NULL AUTO_INCREMENT,
+    `id_transaction` INT(11) NOT NULL,
+    `tanggal` DATETIME NOT NULL,
+    `akun` VARCHAR(100) NOT NULL,
+    `debit` INT(11) NOT NULL DEFAULT 0,
+    `kredit` INT(11) NOT NULL DEFAULT 0,
+
+    PRIMARY KEY (`id_journal`),
+    KEY `idx_journal_transaction` (`id_transaction`),
+
+    CONSTRAINT `fk_journal_transaction`
+        FOREIGN KEY (`id_transaction`)
+        REFERENCES `tbl_transaction` (`id_transaction`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+-- 3. Isi harga_pokok produk contoh (opsional, sesuaikan)
+UPDATE `tbl_products` SET `harga_pokok` = 5000 WHERE `id_product` = 2;
+UPDATE `tbl_products` SET `harga_pokok` = 3000 WHERE `id_product` = 3;
 
 COMMIT;
