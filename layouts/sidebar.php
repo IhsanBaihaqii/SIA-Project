@@ -39,6 +39,12 @@
                     <span>Transaksi</span>
                 </a>
             </li>
+            <li>
+                <a href="../laporan/index.php" class="flex items-center p-2 rounded-lg hover:bg-blue-400 text-white <?= (strpos($_SERVER['REQUEST_URI'], 'laporan') !== false) ? 'bg-blue-500 text-blue-600' : '' ?>">
+                    <i class="fas fa-newspaper w-5 h-5 mr-3"></i>
+                    <span>Laporan</span>
+                </a>
+            </li>
         </ul>
     </nav>
 
