@@ -49,6 +49,7 @@ include '../layouts/navbar.php';
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga Pokok</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stok</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
@@ -60,11 +61,19 @@ include '../layouts/navbar.php';
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $product['id_product'] ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($product['nama']) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($product['kategori']) ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?= number_format($product['harga_pokok'], 0, ',', '.') ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp <?= number_format($product['harga'], 0, ',', '.') ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $product['stok'] ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <!-- Tombol Edit dengan data produk -->
-                            <button onclick="openEditModal(<?= $product['id_product'] ?>, '<?= addslashes($product['nama']) ?>', '<?= addslashes($product['kategori']) ?>', <?= $product['harga'] ?>, <?= $product['stok'] ?>)" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <button onclick="openEditModal(
+                                <?= $product['id_product'] ?>,
+                                '<?= addslashes($product['nama']) ?>',
+                                '<?= addslashes($product['kategori']) ?>',
+                                <?= (int)$product['harga'] ?>,
+                                <?= (int)($product['harga_pokok'] ?? 0) ?>,
+                                <?= (int)$product['stok'] ?>
+                            )" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <!-- Tombol Hapus -->
@@ -95,6 +104,11 @@ include '../layouts/navbar.php';
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="kategori">Kategori</label>
                 <input type="text" name="kategori" id="kategori" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="harga_pokok">Harga Pokok (HPP)</label>
+                <input type="number" name="harga_pokok" id="harga_pokok" required min="0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="harga">Harga</label>
@@ -128,6 +142,11 @@ include '../layouts/navbar.php';
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_kategori">Kategori</label>
                 <input type="text" name="kategori" id="edit_kategori" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_harga_pokok">Harga Pokok (HPP)</label>
+                <input type="number" name="harga_pokok" id="edit_harga_pokok" required min="0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="edit_harga">Harga</label>
@@ -178,11 +197,12 @@ include '../layouts/navbar.php';
     }
 
     // Modal Edit: isi data dari parameter
-    function openEditModal(id, nama, kategori, harga, stok) {
+    function openEditModal(id, nama, kategori, harga, harga_pokok, stok) {
         document.getElementById('edit_id').value = id;
         document.getElementById('edit_nama').value = nama;
         document.getElementById('edit_kategori').value = kategori;
         document.getElementById('edit_harga').value = harga;
+        document.getElementById('edit_harga_pokok').value = harga_pokok;
         document.getElementById('edit_stok').value = stok;
         openModal('modalEdit');
     }
