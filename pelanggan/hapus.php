@@ -1,17 +1,25 @@
 <?php
+include '../config/koneksi.php';
 
-require_once '../config/database.php';
-require_once '../config/auth.php';
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    header("Location: index.php?error=" . urlencode("ID pelanggan tidak valid"));
+    exit;
+}
 
-$id = $_GET['id'] ?? 0;
+// Cek apakah data ada
+$stmt = $pdo->prepare("SELECT * FROM tbl_pelanggan WHERE id_pelanggan = :id");
+$stmt->execute([':id' => $id]);
+$pelanggan = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$query = "DELETE FROM tbl_pelanggan WHERE id_pelanggan = ?";
+if (!$pelanggan) {
+    header("Location: index.php?error=" . urlencode("Pelanggan tidak ditemukan"));
+    exit;
+}
 
-$stmt = mysqli_prepare($conn, $query);
+// Hapus data
+$stmt = $pdo->prepare("DELETE FROM tbl_pelanggan WHERE id_pelanggan = :id");
+$stmt->execute([':id' => $id]);
 
-mysqli_stmt_bind_param($stmt, "i", $id);
-
-mysqli_stmt_execute($stmt);
-
-header("Location: index.php");
+header("Location: index.php?success=hapus");
 exit;

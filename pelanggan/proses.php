@@ -1,73 +1,59 @@
 <?php
+include '../config/koneksi.php';
 
-require_once '../config/database.php';
-require_once '../config/auth.php';
-
-$aksi = $_POST['aksi'] ?? '';
-
-if ($aksi == 'tambah') {
-
-    $nama = trim($_POST['nama']);
-    $alamat = trim($_POST['alamat']);
-    $nomor_hp = trim($_POST['nomor_hp']);
-
-    if ($nama == '' || $alamat == '' || $nomor_hp == '') {
-        die('Semua data pelanggan wajib diisi.');
-    }
-
-    $query = "INSERT INTO tbl_pelanggan
-              (nama, alamat, nomor_hp)
-              VALUES (?, ?, ?)";
-
-    $stmt = mysqli_prepare($conn, $query);
-
-    mysqli_stmt_bind_param(
-        $stmt,
-        "sss",
-        $nama,
-        $alamat,
-        $nomor_hp
-    );
-
-    mysqli_stmt_execute($stmt);
-
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: index.php");
     exit;
 }
 
+$action = $_POST['action'] ?? '';
+$nama = trim($_POST['nama'] ?? '');
+$no_hp = trim($_POST['no_hp'] ?? '');
+$alamat = trim($_POST['alamat'] ?? '');
 
-if ($aksi == 'edit') {
+// Validasi
+$errors = [];
+if (empty($nama)) {
+    $errors[] = "Nama pelanggan wajib diisi";
+}
 
-    $id = $_POST['id_pelanggan'];
-    $nama = trim($_POST['nama']);
-    $alamat = trim($_POST['alamat']);
-    $nomor_hp = trim($_POST['nomor_hp']);
-
-    if ($nama == '' || $alamat == '' || $nomor_hp == '') {
-        die('Semua data pelanggan wajib diisi.');
+if (!empty($errors)) {
+    $pesan = implode(', ', $errors);
+    if ($action === 'edit') {
+        $id = $_POST['id_pelanggan'] ?? 0;
+        header("Location: edit.php?id=$id&error=" . urlencode($pesan));
+    } else {
+        header("Location: tambah.php?error=" . urlencode($pesan));
     }
-
-    $query = "UPDATE tbl_pelanggan
-              SET nama = ?, alamat = ?, nomor_hp = ?
-              WHERE id_pelanggan = ?";
-
-    $stmt = mysqli_prepare($conn, $query);
-
-    mysqli_stmt_bind_param(
-        $stmt,
-        "sssi",
-        $nama,
-        $alamat,
-        $nomor_hp,
-        $id
-    );
-
-    mysqli_stmt_execute($stmt);
-
-    header("Location: index.php");
     exit;
 }
 
+if ($action === 'add') {
+    $stmt = $pdo->prepare("INSERT INTO tbl_pelanggan (nama, no_hp, alamat) VALUES (:nama, :no_hp, :alamat)");
+    $stmt->execute([
+        ':nama' => $nama,
+        ':no_hp' => $no_hp,
+        ':alamat' => $alamat
+    ]);
+    header("Location: index.php?success=tambah");
+    exit;
+} elseif ($action === 'edit') {
+    $id = $_POST['id_pelanggan'] ?? 0;
+    if ($id <= 0) {
+        header("Location: index.php?error=" . urlencode("ID pelanggan tidak valid"));
+        exit;
+    }
 
-header("Location: index.php");
-exit;
+    $stmt = $pdo->prepare("UPDATE tbl_pelanggan SET nama = :nama, no_hp = :no_hp, alamat = :alamat WHERE id_pelanggan = :id");
+    $stmt->execute([
+        ':nama' => $nama,
+        ':no_hp' => $no_hp,
+        ':alamat' => $alamat,
+        ':id' => $id
+    ]);
+    header("Location: index.php?success=edit");
+    exit;
+} else {
+    header("Location: index.php?error=" . urlencode("Aksi tidak valid"));
+    exit;
+}
