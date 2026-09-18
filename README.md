@@ -416,6 +416,20 @@ kasir
 
 ---
 
+# tbl_pelanggan
+
+Menyimpan data pelanggan.
+
+| Kolom          | Tipe Data                                    | Keterangan |
+| -------------- | -------------------------------------------- | ---------- |
+| `id_pelanggan` | INT(11) NOT NULL AUTO_INCREMENT              |            |
+| `nama`         | VARCHAR(100) NOT NULL                        |            |
+| `no_hp`        | VARCHAR(20) DEFAULT NULL                     |            |
+| `alamat`       | TEXT DEFAULT NULL                            |            |
+| `created_at`   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |            |
+
+---
+
 ## `tbl_products`
 
 Menyimpan data produk dan stok.
