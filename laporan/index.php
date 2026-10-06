@@ -66,8 +66,70 @@ $balance          = ($selisih === 0);
 ?>
 
 <main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
-    <!-- Header & Tombol Tambah -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #area-cetak,
+            #area-cetak * {
+                visibility: visible;
+            }
+
+            #area-cetak {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                background: #ffffff !important;
+            }
+
+            #area-cetak .tabel-jurnal {
+                border-collapse: collapse !important;
+                font-size: 11px !important;
+                width: 100% !important;
+            }
+
+            #area-cetak .tabel-jurnal th,
+            #area-cetak .tabel-jurnal td {
+                border: 1px solid #000000 !important;
+                padding: 4px 6px !important;
+                color: #000000 !important;
+            }
+
+            #area-cetak .tabel-jurnal thead th {
+                background: #e5e7eb !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            #area-cetak .tabel-jurnal tr {
+                page-break-inside: avoid;
+            }
+
+            #area-cetak .tabel-jurnal tfoot td {
+                background: #f3f4f6 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 1cm;
+            }
+        }
+    </style>
+
+    <!-- Bagian atas: judul halaman + tombol aksi (tidak dicetak) -->
+    <div class="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Jurnal Umum</h1>
             <p class="text-gray-500 text-sm">
@@ -81,17 +143,17 @@ $balance          = ($selisih === 0);
                 class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2">
                 <i class="fa-solid fa-print"></i> Cetak
             </button>
-            <a href="jurnal_form.php"
+            <a href="../kasir/index.php"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> Transaksi Baru
             </a>
         </div>
     </div>
 
-    <!-- Kartu Ringkasan -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Kartu ringkasan (tidak dicetak) -->
+    <div class="no-print grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
-        <!-- Total Debit -->
+        <!-- Total debit periode -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -104,7 +166,7 @@ $balance          = ($selisih === 0);
             </div>
         </div>
 
-        <!-- Total Kredit -->
+        <!-- Total kredit periode -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -117,7 +179,7 @@ $balance          = ($selisih === 0);
             </div>
         </div>
 
-        <!-- Selisih -->
+        <!-- Selisih debit - kredit -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -132,7 +194,7 @@ $balance          = ($selisih === 0);
             </div>
         </div>
 
-        <!-- Jumlah Transaksi -->
+        <!-- Jumlah transaksi unik dalam periode -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -146,10 +208,11 @@ $balance          = ($selisih === 0);
         </div>
     </div>
 
-    <!-- Filter / Pencarian -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+    <!-- Baris filter dan pencarian (tidak dicetak) -->
+    <div class="no-print bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
         <form method="get" class="flex flex-wrap items-center gap-3">
-            <!-- Pencarian teks -->
+
+            <!-- Input pencarian teks -->
             <div class="relative flex-1 min-w-[200px]">
                 <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" name="cari" value="<?= bersih($cari) ?>"
@@ -157,15 +220,15 @@ $balance          = ($selisih === 0);
                     class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
             </div>
 
-            <!-- Tanggal dari -->
+            <!-- Batas awal periode -->
             <input type="date" name="dari" value="<?= bersih($dari) ?>"
                 class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
 
-            <!-- Tanggal sampai -->
+            <!-- Batas akhir periode -->
             <input type="date" name="sampai" value="<?= bersih($sampai) ?>"
                 class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
 
-            <!-- Dropdown akun -->
+            <!-- Filter akun -->
             <select name="akun"
                 class="px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
                 <option value="">Semua Akun</option>
@@ -177,20 +240,37 @@ $balance          = ($selisih === 0);
                 <?php endforeach; ?>
             </select>
 
+            <!-- Tombol jalankan filter -->
             <button type="submit"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
                 <i class="fa-solid fa-search"></i> Cari
             </button>
+
+            <!-- Tombol reset filter, hanya muncul jika filter aktif -->
             <?php if ($cari !== '' || $akun_id !== ''): ?>
                 <a href="jurnal.php" class="border border-gray-200 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Reset</a>
             <?php endif; ?>
         </form>
     </div>
 
-    <!-- Tabel Jurnal Umum -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Area yang dicetak, berisi header cetak, tabel, dan tanda tangan -->
+    <div id="area-cetak" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+        <!-- Header cetak, hanya tampil saat print -->
+        <div class="hidden print:block mb-4 text-center">
+            <p class="text-base font-bold uppercase">Nama Perusahaan</p>
+            <p class="text-xs">Alamat perusahaan, telepon, email</p>
+            <hr class="my-2 border-black">
+            <p class="text-sm font-bold uppercase tracking-wider">Jurnal Umum</p>
+            <p class="text-xs">
+                Periode
+                <?= bersih(date('d/m/Y', strtotime($dari))) ?> s/d
+                <?= bersih(date('d/m/Y', strtotime($sampai))) ?>
+            </p>
+        </div>
+
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
+            <table class="tabel-jurnal w-full text-sm text-left">
                 <thead class="bg-gray-50 text-gray-700 uppercase text-xs border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 font-semibold">Tanggal</th>
@@ -205,6 +285,7 @@ $balance          = ($selisih === 0);
 
                 <tbody class="divide-y divide-gray-100">
                     <?php if (empty($grup)): ?>
+                        <!-- Baris kosong jika tidak ada data pada periode -->
                         <tr>
                             <td colspan="7" class="px-6 py-10 text-center text-gray-500">
                                 <i class="fa-solid fa-inbox text-3xl text-gray-300 mb-2 block"></i>
@@ -214,13 +295,13 @@ $balance          = ($selisih === 0);
                     <?php else: ?>
                         <?php foreach ($grup as $no_bukti => $baris_list): ?>
                             <?php
-                            // Baris pertama grup untuk tanggal dan keterangan
+                            // Ambil baris pertama untuk tanggal dan keterangan grup
                             $first = $baris_list[0];
                             $tgl_fmt = date('d/m/Y', strtotime($first['tanggal']));
                             ?>
                             <?php foreach ($baris_list as $i => $b): ?>
                                 <?php
-                                // Baris kredit di-indent, baris debit rata normal
+                                // Tandai baris kredit untuk indentasi dan baris pertama untuk info grup
                                 $is_kredit  = ((int)$b['kredit'] > 0);
                                 $is_pertama = ($i === 0);
                                 ?>
@@ -257,11 +338,14 @@ $balance          = ($selisih === 0);
 
                 <?php if (!empty($grup)): ?>
                     <tfoot class="bg-gray-50 border-t border-gray-200">
+                        <!-- Baris total debit dan kredit -->
                         <tr>
                             <td colspan="5" class="px-6 py-4 text-right font-semibold text-gray-700 uppercase text-xs tracking-wide">Total</td>
                             <td class="px-6 py-4 text-right font-bold text-gray-800 tabular-nums"><?= rupiah($total_debit) ?></td>
                             <td class="px-6 py-4 text-right font-bold text-gray-800 tabular-nums"><?= rupiah($total_kredit) ?></td>
                         </tr>
+
+                        <!-- Baris status keseimbangan jurnal -->
                         <tr>
                             <td colspan="7" class="px-6 py-3 text-right text-xs border-t border-gray-100">
                                 <?php if ($balance): ?>
@@ -282,8 +366,22 @@ $balance          = ($selisih === 0);
             </table>
         </div>
 
-        <!-- Footer tabel -->
-        <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+        <!-- Area tanda tangan, hanya tampil saat print -->
+        <div class="hidden print:flex justify-between mt-10 px-4 text-xs">
+            <div class="text-center">
+                <p>Dibuat oleh,</p>
+                <div class="h-16"></div>
+                <p class="border-t border-black pt-1 w-40 mx-auto">Bagian Akuntansi</p>
+            </div>
+            <div class="text-center">
+                <p>Diperiksa oleh,</p>
+                <div class="h-16"></div>
+                <p class="border-t border-black pt-1 w-40 mx-auto">Manajer</p>
+            </div>
+        </div>
+
+        <!-- Footer info jumlah baris, tidak tampil saat print -->
+        <div class="no-print px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
             <span class="text-gray-500">
                 Menampilkan <?= count($rows) ?> baris jurnal dari <?= $jumlah_transaksi ?> transaksi
             </span>
