@@ -2,14 +2,13 @@
 require '../config/koneksi.php';
 require '../includes/helpers.php';
 
-include '../config/koneksi.php';
 include '../layouts/header.php';
 include '../layouts/sidebar.php';
 include '../layouts/navbar.php';
 
 // 1. Ambil parameter filter dari URL
-$dari    = $_GET['dari']   ?? date('Y-m-01'); // default awal bulan ini
-$sampai  = $_GET['sampai'] ?? date('Y-m-t');  // default akhir bulan ini
+$dari    = $_GET['dari']   ?? date('Y-m-01');
+$sampai  = $_GET['sampai'] ?? date('Y-m-t');
 $cari    = trim($_GET['cari'] ?? '');
 $akun_id = $_GET['akun']   ?? '';
 
@@ -30,7 +29,6 @@ $params = [
     ':sampai' => $sampai,
 ];
 
-// filter pencarian teks (pakai placeholder berbeda agar aman di native prepare)
 if ($cari !== '') {
     $sql .= " AND (j.no_bukti LIKE :c1 OR j.keterangan LIKE :c2 OR a.nama_akun LIKE :c3)";
     $params[':c1'] = '%' . $cari . '%';
@@ -38,7 +36,6 @@ if ($cari !== '') {
     $params[':c3'] = '%' . $cari . '%';
 }
 
-// filter akun
 if ($akun_id !== '') {
     $sql .= " AND j.id_akun = :akun";
     $params[':akun'] = $akun_id;
@@ -50,18 +47,13 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ---------------------------------------------------------------------
 // 4. Kelompokkan baris jurnal berdasarkan no_bukti
-//    Satu no_bukti biasanya berisi 2 baris (debit & kredit)
-// ---------------------------------------------------------------------
 $grup = [];
 foreach ($rows as $r) {
     $grup[$r['no_bukti']][] = $r;
 }
 
-// ---------------------------------------------------------------------
 // 5. Hitung ringkasan
-// ---------------------------------------------------------------------
 $total_debit  = 0;
 $total_kredit = 0;
 foreach ($rows as $r) {

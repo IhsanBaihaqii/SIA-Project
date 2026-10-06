@@ -99,27 +99,46 @@ try {
     }
 
     // ============ 5. AUTO JURNAL ============
-    //  Kas                (D)  total
-    //  Penjualan          (K)  total
-    //  Harga Pokok Penjualan (D)  hpp
-    //  Persediaan         (K)  hpp
-    $stmtJurnal = $pdo->prepare("INSERT INTO tbl_journal
-                                 (id_transaction, tanggal, akun, debit, kredit)
-                                 VALUES (:id_transaction, NOW(), :akun, :debit, :kredit)");
+    // Kas                    (D)  totalTransaksi
+    // Penjualan              (K)  totalTransaksi
+    // Harga Pokok Penjualan  (D)  totalHpp
+    // Persediaan             (K)  totalHpp
+
+    $cariAkun = $pdo->prepare("SELECT id_akun FROM tbl_akun WHERE nama_akun = :n LIMIT 1");
+    $getIdAkun = function ($nama) use ($cariAkun) {
+        $cariAkun->execute([':n' => $nama]);
+        $id = $cariAkun->fetchColumn();
+        if (!$id) {
+            throw new Exception("Akun '$nama' belum ada di tbl_akun.");
+        }
+        return (int)$id;
+    };
+
+    $id_kas        = $getIdAkun('Kas');
+    $id_penjualan  = $getIdAkun('Pendapatan Penjualan');
+
+    $no_bukti   = 'TRX-' . str_pad($id_transaction, 5, '0', STR_PAD_LEFT);
+    $keterangan = 'Penjualan kasir #' . $id_transaction;
+
+    $stmtJurnal = $pdo->prepare(
+        "INSERT INTO tbl_journal
+            (no_bukti, tanggal, keterangan, id_akun, debit, kredit)
+         VALUES
+            (:no_bukti, NOW(), :keterangan, :id_akun, :debit, :kredit)"
+    );
 
     $jurnal = [
-        ['Kas',                   $totalTransaksi, 0],
-        ['Penjualan',             0,              $totalTransaksi],
-        ['Harga Pokok Penjualan', $totalHpp,      0],
-        ['Persediaan',            0,              $totalHpp],
+        [$id_kas,        $totalTransaksi, 0],
+        [$id_penjualan,  0,               $totalTransaksi],
     ];
 
     foreach ($jurnal as $j) {
         $stmtJurnal->execute([
-            ':id_transaction' => $id_transaction,
-            ':akun'           => $j[0],
-            ':debit'          => $j[1],
-            ':kredit'         => $j[2],
+            ':no_bukti'   => $no_bukti,
+            ':keterangan' => $keterangan,
+            ':id_akun'    => $j[0],
+            ':debit'      => $j[1],
+            ':kredit'     => $j[2],
         ]);
     }
 
@@ -127,7 +146,6 @@ try {
 
     header("Location: index.php?success=1");
     exit;
-
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
