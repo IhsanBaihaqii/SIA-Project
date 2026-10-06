@@ -1,22 +1,41 @@
 <?php
-    include '../config/koneksi.php';
+include '../config/koneksi.php';
+include '../includes/helpers.php';
 
-    $query = "SELECT COUNT(*) AS total_produk FROM tbl_products;";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();
+// total produk
+$query = "SELECT COUNT(*) AS total_produk FROM tbl_products;";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$total_produk = $stmt->fetchColumn();
 
-    $total_produk = $stmt->fetchColumn();
+// total pelanggan
+$query = "SELECT COUNT(*) AS total_pelanggan FROM tbl_pelanggan;";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$total_pelanggan = $stmt->fetchColumn();
 
-    // Sertakan layout
-    include '../layouts/header.php';
-    include '../layouts/sidebar.php';
-    include '../layouts/navbar.php';
+// total transaksi
+$query = "SELECT COUNT(*) AS total_transaksi FROM tbl_transaction;";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$total_transaksi = $stmt->fetchColumn();
+
+// total pendapatan
+$query = "SELECT SUM(total) AS total_pendapatan FROM tbl_transaction;";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$total_pendapatan = $stmt->fetchColumn();
+
+// Sertakan layout
+include '../layouts/header.php';
+include '../layouts/sidebar.php';
+include '../layouts/navbar.php';
 ?>
 
 <main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard  <span class="text-red-400 text-sm">(DATABASE YANG BARU AKU HUBUNGKAN BARU TOTAL_PRODUK, JUMLAH PRODUK SUDAH SESUAI DENGAN DATABASE)</span></h1>
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
         <p class="text-gray-500 text-sm">Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
     </div>
 
@@ -27,9 +46,9 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">Rp 0</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><?php echo rupiah($total_pendapatan); ?></p>
                     <span class="inline-flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full mt-2">
-                        <i class="fa-solid fa-arrow-up mr-1"></i> 12.5%
+                        <!-- <i class="fa-solid fa-arrow-up mr-1"></i> 12.5% -->
                     </span>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
@@ -43,9 +62,9 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Transaksi</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><?php echo $total_transaksi; ?></p>
                     <span class="inline-flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full mt-2">
-                        <i class="fa-solid fa-arrow-up mr-1"></i> 8.2%
+                        <!-- <i class="fa-solid fa-arrow-up mr-1"></i> 8.2% -->
                     </span>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
@@ -75,7 +94,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500">Pelanggan</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><?php echo $total_pelanggan; ?></p>
                     <span class="inline-flex items-center text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full mt-2">
                         <i class="fa-solid fa-arrow-up mr-1"></i> 5.7%
                     </span>

@@ -72,6 +72,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
         overflow: hidden;
       }
+      .icon-submit{
+        color:yellow;
+      }
       .left-panel {
         background: linear-gradient(145deg, #f1f5f9 0%, #e9eef3 100%);
         padding: 2.5rem 1.5rem;
@@ -291,7 +294,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <!-- Submit -->
             <button type="submit" class="btn-login">
-              <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+              <i class="icon-submit fa-solid fa-arrow-right-to-bracket"></i> Login
             </button>
 
             <!-- Error message (muncul setelah klik) -->
