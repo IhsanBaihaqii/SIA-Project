@@ -1,314 +1,301 @@
 <?php
+require '../config/koneksi.php';
+require '../includes/helpers.php';
+
 include '../config/koneksi.php';
 include '../layouts/header.php';
 include '../layouts/sidebar.php';
 include '../layouts/navbar.php';
+
+// 1. Ambil parameter filter dari URL
+$dari    = $_GET['dari']   ?? date('Y-m-01'); // default awal bulan ini
+$sampai  = $_GET['sampai'] ?? date('Y-m-t');  // default akhir bulan ini
+$cari    = trim($_GET['cari'] ?? '');
+$akun_id = $_GET['akun']   ?? '';
+
+// 2. Ambil daftar akun untuk dropdown filter
+$stmtAkun  = $pdo->query("SELECT id_akun, kode_akun, nama_akun FROM tbl_akun ORDER BY kode_akun");
+$akun_list = $stmtAkun->fetchAll(PDO::FETCH_ASSOC);
+
+// 3. Susun query jurnal dengan filter
+$sql = "SELECT j.id_journal, j.no_bukti, j.tanggal, j.keterangan,
+               j.debit, j.kredit,
+               a.id_akun, a.kode_akun, a.nama_akun
+        FROM tbl_journal j
+        JOIN tbl_akun a ON a.id_akun = j.id_akun
+        WHERE DATE(j.tanggal) BETWEEN :dari AND :sampai";
+
+$params = [
+    ':dari'   => $dari,
+    ':sampai' => $sampai,
+];
+
+// filter pencarian teks (pakai placeholder berbeda agar aman di native prepare)
+if ($cari !== '') {
+    $sql .= " AND (j.no_bukti LIKE :c1 OR j.keterangan LIKE :c2 OR a.nama_akun LIKE :c3)";
+    $params[':c1'] = '%' . $cari . '%';
+    $params[':c2'] = '%' . $cari . '%';
+    $params[':c3'] = '%' . $cari . '%';
+}
+
+// filter akun
+if ($akun_id !== '') {
+    $sql .= " AND j.id_akun = :akun";
+    $params[':akun'] = $akun_id;
+}
+
+$sql .= " ORDER BY j.tanggal ASC, j.no_bukti ASC, j.id_journal ASC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// ---------------------------------------------------------------------
+// 4. Kelompokkan baris jurnal berdasarkan no_bukti
+//    Satu no_bukti biasanya berisi 2 baris (debit & kredit)
+// ---------------------------------------------------------------------
+$grup = [];
+foreach ($rows as $r) {
+    $grup[$r['no_bukti']][] = $r;
+}
+
+// ---------------------------------------------------------------------
+// 5. Hitung ringkasan
+// ---------------------------------------------------------------------
+$total_debit  = 0;
+$total_kredit = 0;
+foreach ($rows as $r) {
+    $total_debit  += (int)$r['debit'];
+    $total_kredit += (int)$r['kredit'];
+}
+$selisih          = $total_debit - $total_kredit;
+$jumlah_transaksi = count($grup);
+$balance          = ($selisih === 0);
 ?>
 
 <main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
-    <!-- Container utama halaman jurnal umum -->
-    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-
-        <!-- Header halaman: judul dan tombol aksi -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-            <div>
-                <h1 class="text-3xl font-semibold text-gray-900 dark:text-white">Jurnal Umum</h1>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Catatan transaksi akuntansi periode berjalan</p>
-            </div>
-            <div class="flex gap-2">
-                <!-- Tombol export jurnal -->
-                <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium">
-                    <i class="fa-solid fa-file-export"></i>
-                    <span>Export</span>
-                </button>
-                <!-- Tombol tambah transaksi baru -->
-                <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Transaksi Baru</span>
-                </button>
-            </div>
+    <!-- Header & Tombol Tambah -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Jurnal Umum</h1>
+            <p class="text-gray-500 text-sm">
+                Catatan transaksi akuntansi periode
+                <?= bersih(date('d/m/Y', strtotime($dari))) ?> s/d
+                <?= bersih(date('d/m/Y', strtotime($sampai))) ?>
+            </p>
         </div>
-
-        <!-- Kartu ringkasan: total debit, total kredit, selisih, jumlah transaksi -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <!-- Kartu total debit -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Debit</p>
-                        <p class="text-xl font-semibold text-gray-900 mt-1">Rp 12.450.000</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <i class="fa-solid fa-arrow-down text-blue-600"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- Kartu total kredit -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Kredit</p>
-                        <p class="text-xl font-semibold text-gray-900 mt-1">Rp 12.450.000</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                        <i class="fa-solid fa-arrow-up text-green-600"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- Kartu selisih debit kredit -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500">Selisih</p>
-                        <p class="text-xl font-semibold text-gray-900 mt-1">Rp 0</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <i class="fa-solid fa-scale-balanced text-purple-600"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- Kartu jumlah transaksi -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500">Jumlah Transaksi</p>
-                        <p class="text-xl font-semibold text-gray-900 mt-1">24</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                        <i class="fa-solid fa-receipt text-orange-600"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="mt-3 sm:mt-0 flex gap-2">
+            <button onclick="window.print()"
+                class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-print"></i> Cetak
+            </button>
+            <a href="jurnal_form.php"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Transaksi Baru
+            </a>
         </div>
+    </div>
 
-        <!-- Filter bar: pencarian, tanggal, akun -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <!-- Input pencarian keterangan atau nomor jurnal -->
-                <div class="md:col-span-2 relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" placeholder="Cari keterangan atau no. jurnal..." class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <!-- Input filter tanggal -->
+    <!-- Kartu Ringkasan -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+        <!-- Total Debit -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
                 <div>
-                    <input type="date" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <p class="text-xs uppercase tracking-wide text-gray-500">Total Debit</p>
+                    <p class="text-lg font-bold text-gray-800 mt-1"><?= rupiah($total_debit) ?></p>
                 </div>
-                <!-- Dropdown filter akun -->
-                <div>
-                    <select class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option>Semua Akun</option>
-                        <option>Kas</option>
-                        <option>Piutang Usaha</option>
-                        <option>Utang Usaha</option>
-                        <option>Pendapatan</option>
-                        <option>Beban</option>
-                    </select>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-down text-blue-600"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Tabel jurnal umum -->
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <!-- Header tabel -->
-                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+        <!-- Total Kredit -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-gray-500">Total Kredit</p>
+                    <p class="text-lg font-bold text-gray-800 mt-1"><?= rupiah($total_kredit) ?></p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-up text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selisih -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-gray-500">Selisih</p>
+                    <p class="text-lg font-bold <?= $balance ? 'text-gray-800' : 'text-red-600' ?> mt-1">
+                        <?= rupiah($selisih) ?>
+                    </p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                    <i class="fa-solid fa-scale-balanced text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jumlah Transaksi -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-gray-500">Jumlah Transaksi</p>
+                    <p class="text-lg font-bold text-gray-800 mt-1"><?= $jumlah_transaksi ?></p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                    <i class="fa-solid fa-receipt text-amber-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter / Pencarian -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+        <form method="get" class="flex flex-wrap items-center gap-3">
+            <!-- Pencarian teks -->
+            <div class="relative flex-1 min-w-[200px]">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="cari" value="<?= bersih($cari) ?>"
+                    placeholder="Cari no. bukti, keterangan, atau nama akun..."
+                    class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+            </div>
+
+            <!-- Tanggal dari -->
+            <input type="date" name="dari" value="<?= bersih($dari) ?>"
+                class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+
+            <!-- Tanggal sampai -->
+            <input type="date" name="sampai" value="<?= bersih($sampai) ?>"
+                class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+
+            <!-- Dropdown akun -->
+            <select name="akun"
+                class="px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm">
+                <option value="">Semua Akun</option>
+                <?php foreach ($akun_list as $a): ?>
+                    <option value="<?= (int)$a['id_akun'] ?>"
+                        <?= ($akun_id !== '' && (int)$akun_id === (int)$a['id_akun']) ? 'selected' : '' ?>>
+                        <?= bersih($a['kode_akun']) ?> - <?= bersih($a['nama_akun']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-search"></i> Cari
+            </button>
+            <?php if ($cari !== '' || $akun_id !== ''): ?>
+                <a href="jurnal.php" class="border border-gray-200 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Reset</a>
+            <?php endif; ?>
+        </form>
+    </div>
+
+    <!-- Tabel Jurnal Umum -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-700 uppercase text-xs border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Tanggal</th>
+                        <th class="px-6 py-4 font-semibold">No. Bukti</th>
+                        <th class="px-6 py-4 font-semibold">Kode</th>
+                        <th class="px-6 py-4 font-semibold">Nama Akun</th>
+                        <th class="px-6 py-4 font-semibold">Keterangan</th>
+                        <th class="px-6 py-4 font-semibold text-right">Debit</th>
+                        <th class="px-6 py-4 font-semibold text-right">Kredit</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+                    <?php if (empty($grup)): ?>
                         <tr>
-                            <th class="px-4 py-3 font-semibold">Tanggal</th>
-                            <th class="px-4 py-3 font-semibold">No. Jurnal</th>
-                            <th class="px-4 py-3 font-semibold">Kode</th>
-                            <th class="px-4 py-3 font-semibold">Nama Akun</th>
-                            <th class="px-4 py-3 font-semibold">Keterangan</th>
-                            <th class="px-4 py-3 font-semibold text-right">Debit</th>
-                            <th class="px-4 py-3 font-semibold text-right">Kredit</th>
-                            <th class="px-4 py-3 font-semibold text-center">Aksi</th>
+                            <td colspan="7" class="px-6 py-10 text-center text-gray-500">
+                                <i class="fa-solid fa-inbox text-3xl text-gray-300 mb-2 block"></i>
+                                Belum ada data jurnal pada periode ini.
+                            </td>
                         </tr>
-                    </thead>
+                    <?php else: ?>
+                        <?php foreach ($grup as $no_bukti => $baris_list): ?>
+                            <?php
+                            // Baris pertama grup untuk tanggal dan keterangan
+                            $first = $baris_list[0];
+                            $tgl_fmt = date('d/m/Y', strtotime($first['tanggal']));
+                            ?>
+                            <?php foreach ($baris_list as $i => $b): ?>
+                                <?php
+                                // Baris kredit di-indent, baris debit rata normal
+                                $is_kredit  = ((int)$b['kredit'] > 0);
+                                $is_pertama = ($i === 0);
+                                ?>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-3 text-gray-600 whitespace-nowrap">
+                                        <?= $is_pertama ? $tgl_fmt : '' ?>
+                                    </td>
+                                    <td class="px-6 py-3 text-gray-700 font-medium whitespace-nowrap">
+                                        <?= $is_pertama ? bersih($no_bukti) : '' ?>
+                                    </td>
+                                    <td class="px-6 py-3 text-gray-600 whitespace-nowrap">
+                                        <?= bersih($b['kode_akun']) ?>
+                                    </td>
+                                    <td class="px-6 py-3 <?= $is_kredit ? 'pl-12 italic text-gray-600' : 'font-medium text-gray-800' ?>">
+                                        <?php if ($is_kredit): ?>
+                                            <i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>
+                                        <?php endif; ?>
+                                        <?= bersih($b['nama_akun']) ?>
+                                    </td>
+                                    <td class="px-6 py-3 text-gray-600">
+                                        <?= $is_pertama ? bersih($b['keterangan']) : '' ?>
+                                    </td>
+                                    <td class="px-6 py-3 text-right tabular-nums <?= ((int)$b['debit'] > 0) ? 'text-gray-800 font-medium' : 'text-gray-300' ?>">
+                                        <?= ((int)$b['debit'] > 0) ? rupiah($b['debit']) : '-' ?>
+                                    </td>
+                                    <td class="px-6 py-3 text-right tabular-nums <?= ((int)$b['kredit'] > 0) ? 'text-gray-800 font-medium' : 'text-gray-300' ?>">
+                                        <?= ((int)$b['kredit'] > 0) ? rupiah($b['kredit']) : '-' ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
 
-                    <!-- Isi tabel: daftar transaksi jurnal umum -->
-                    <tbody class="divide-y divide-gray-200">
-
-                        <!-- Baris transaksi 1: pencatatan kas dari pendapatan jasa -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-700">01/01/2025</td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">JU-001</td>
-                            <td class="px-4 py-3 text-gray-700">1-1000</td>
-                            <td class="px-4 py-3 text-gray-900 font-medium">Kas</td>
-                            <td class="px-4 py-3 text-gray-600">Penerimaan jasa konsultasi</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 5.000.000</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Baris akun lawan untuk transaksi 1 -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">01/01/2025</td>
-                            <td class="px-4 py-3 text-gray-400">JU-001</td>
-                            <td class="px-4 py-3 text-gray-700">4-1000</td>
-                            <td class="px-4 py-3 text-gray-700 pl-8"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>Pendapatan Jasa</td>
-                            <td class="px-4 py-3 text-gray-600">Penerimaan jasa konsultasi</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 5.000.000</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-
-                        <!-- Baris transaksi 2: pembelian perlengkapan secara kredit -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-700">03/01/2025</td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">JU-002</td>
-                            <td class="px-4 py-3 text-gray-700">1-1200</td>
-                            <td class="px-4 py-3 text-gray-900 font-medium">Perlengkapan</td>
-                            <td class="px-4 py-3 text-gray-600">Pembelian perlengkapan kantor</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 1.500.000</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Baris akun lawan untuk transaksi 2 -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">03/01/2025</td>
-                            <td class="px-4 py-3 text-gray-400">JU-002</td>
-                            <td class="px-4 py-3 text-gray-700">2-1000</td>
-                            <td class="px-4 py-3 text-gray-700 pl-8"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>Utang Usaha</td>
-                            <td class="px-4 py-3 text-gray-600">Pembelian perlengkapan kantor</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 1.500.000</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-
-                        <!-- Baris transaksi 3: pembayaran beban listrik -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-700">05/01/2025</td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">JU-003</td>
-                            <td class="px-4 py-3 text-gray-700">5-1000</td>
-                            <td class="px-4 py-3 text-gray-900 font-medium">Beban Listrik</td>
-                            <td class="px-4 py-3 text-gray-600">Pembayaran tagihan listrik</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 450.000</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Baris akun lawan untuk transaksi 3 -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">05/01/2025</td>
-                            <td class="px-4 py-3 text-gray-400">JU-003</td>
-                            <td class="px-4 py-3 text-gray-700">1-1000</td>
-                            <td class="px-4 py-3 text-gray-700 pl-8"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>Kas</td>
-                            <td class="px-4 py-3 text-gray-600">Pembayaran tagihan listrik</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 450.000</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-
-                        <!-- Baris transaksi 4: pelunasan piutang usaha -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-700">08/01/2025</td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">JU-004</td>
-                            <td class="px-4 py-3 text-gray-700">1-1000</td>
-                            <td class="px-4 py-3 text-gray-900 font-medium">Kas</td>
-                            <td class="px-4 py-3 text-gray-600">Pelunasan piutang pelanggan</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 2.500.000</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Baris akun lawan untuk transaksi 4 -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">08/01/2025</td>
-                            <td class="px-4 py-3 text-gray-400">JU-004</td>
-                            <td class="px-4 py-3 text-gray-700">1-1100</td>
-                            <td class="px-4 py-3 text-gray-700 pl-8"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>Piutang Usaha</td>
-                            <td class="px-4 py-3 text-gray-600">Pelunasan piutang pelanggan</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 2.500.000</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-
-                        <!-- Baris transaksi 5: pembelian peralatan tunai -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-700">10/01/2025</td>
-                            <td class="px-4 py-3 text-gray-700 font-medium">JU-005</td>
-                            <td class="px-4 py-3 text-gray-700">1-1300</td>
-                            <td class="px-4 py-3 text-gray-900 font-medium">Peralatan</td>
-                            <td class="px-4 py-3 text-gray-600">Pembelian peralatan kantor</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 3.000.000</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Baris akun lawan untuk transaksi 5 -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-400">10/01/2025</td>
-                            <td class="px-4 py-3 text-gray-400">JU-005</td>
-                            <td class="px-4 py-3 text-gray-700">1-1000</td>
-                            <td class="px-4 py-3 text-gray-700 pl-8"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-gray-400 mr-2"></i>Kas</td>
-                            <td class="px-4 py-3 text-gray-600">Pembelian peralatan kantor</td>
-                            <td class="px-4 py-3 text-right text-gray-400">-</td>
-                            <td class="px-4 py-3 text-right text-gray-900 font-medium">Rp 3.000.000</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pen"></i></button>
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                    <!-- Footer tabel: baris total debit dan kredit -->
-                    <tfoot class="bg-gray-100 border-t-2 border-gray-300">
+                <?php if (!empty($grup)): ?>
+                    <tfoot class="bg-gray-50 border-t border-gray-200">
                         <tr>
-                            <td colspan="5" class="px-4 py-3 text-right font-semibold text-gray-800">Total</td>
-                            <td class="px-4 py-3 text-right font-bold text-gray-900">Rp 12.450.000</td>
-                            <td class="px-4 py-3 text-right font-bold text-gray-900">Rp 12.450.000</td>
-                            <td class="px-4 py-3"></td>
+                            <td colspan="5" class="px-6 py-4 text-right font-semibold text-gray-700 uppercase text-xs tracking-wide">Total</td>
+                            <td class="px-6 py-4 text-right font-bold text-gray-800 tabular-nums"><?= rupiah($total_debit) ?></td>
+                            <td class="px-6 py-4 text-right font-bold text-gray-800 tabular-nums"><?= rupiah($total_kredit) ?></td>
                         </tr>
-                        <!-- Baris status keseimbangan jurnal -->
                         <tr>
-                            <td colspan="8" class="px-4 py-2 text-right text-xs">
-                                <span class="inline-flex items-center gap-1 text-green-700 font-medium">
-                                    <i class="fa-solid fa-circle-check"></i>
-                                    <span>Jurnal balance</span>
-                                </span>
+                            <td colspan="7" class="px-6 py-3 text-right text-xs border-t border-gray-100">
+                                <?php if ($balance): ?>
+                                    <span class="inline-flex items-center gap-1 text-green-700 font-medium">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span>Jurnal balance</span>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1 text-red-700 font-medium">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <span>Jurnal tidak balance, selisih <?= rupiah(abs($selisih)) ?></span>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     </tfoot>
-
-                </table>
-            </div>
+                <?php endif; ?>
+            </table>
         </div>
 
-        <!-- Pagination dan info jumlah data -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4">
-            <p class="text-sm text-gray-600">Menampilkan 1 - 10 dari 24 transaksi</p>
-            <div class="flex items-center gap-1">
-                <!-- Tombol halaman sebelumnya -->
-                <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100">
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <!-- Tombol halaman 1 (aktif) -->
-                <button class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-600 text-white font-medium text-sm">1</button>
-                <!-- Tombol halaman 2 -->
-                <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-sm">2</button>
-                <!-- Tombol halaman 3 -->
-                <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-sm">3</button>
-                <!-- Tombol halaman selanjutnya -->
-                <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-100">
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-            </div>
+        <!-- Footer tabel -->
+        <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+            <span class="text-gray-500">
+                Menampilkan <?= count($rows) ?> baris jurnal dari <?= $jumlah_transaksi ?> transaksi
+            </span>
         </div>
-
     </div>
 </main>
 
