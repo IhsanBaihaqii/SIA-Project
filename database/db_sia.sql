@@ -142,6 +142,9 @@ CREATE TABLE `tbl_user` (
   `role` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `tbl_user` (`id`, `username`, `password`, `role`) VALUES
+(1, 'admin', 'admin123', 'admin');
+
 -- --------------------------------------------------------
 
 --
