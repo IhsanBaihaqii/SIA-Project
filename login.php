@@ -2,336 +2,453 @@
 session_start();
 include 'config/koneksi.php';
 
-// Jika sudah login, langsung ke dashboard
 if (isset($_SESSION["login"]) && $_SESSION["login"] === true) {
-    header("Location: dashboard/");
-    exit;
+  header("Location: dashboard/");
+  exit;
 }
 
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST["username"] ?? "");
-    $password = $_POST["password"] ?? "";
+  $username = trim($_POST["username"] ?? "");
+  $password = $_POST["password"] ?? "";
 
-    if ($username === "" || $password === "") {
-        $error = "Username dan password wajib diisi!";
+  if ($username === "" || $password === "") {
+    $error = "Username dan password wajib diisi!";
+  } else {
+    $query = "SELECT * FROM tbl_user WHERE username = :username LIMIT 1";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(["username" => $username]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+      $error = "Username atau password salah!";
+    } elseif ($password === $user["password"]) {
+      $_SESSION["login"] = true;
+      $_SESSION["id_user"] = $user["id"];
+      $_SESSION["username"] = $user["username"];
+      $_SESSION["role"] = $user["role"];
+
+      session_regenerate_id(true);
+      header("Location: dashboard/");
+      exit;
     } else {
-        $query = "SELECT * FROM tbl_user WHERE username = :username LIMIT 1";
-
-        $stmt = $pdo->prepare($query);
-
-        $stmt->execute([
-            "username" => $username
-        ]);
-
-        $user = $stmt->fetch();
-
-        if (!$user) {
-            $error = "Username atau password salah!";
-        } elseif ($password === $user["password"]) {
-            $_SESSION["login"] = true;
-            $_SESSION["id_user"] = $user["id"];
-            $_SESSION["username"] = $user["username"];
-            $_SESSION["role"] = $user["role"];
-
-            session_regenerate_id(true);
-            header("Location: dashboard/");
-            exit;
-        } else {
-            $error = "Username atau password salah!";
-        }
+      $error = "Username atau password salah!";
     }
+  }
 }
 ?>
-
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - SIA KASIR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <style>
-      /* sentuhan halus */
-      body {
-        font-family:
-          "Inter",
-          system-ui,
-          -apple-system,
-          sans-serif;
-        background: #f8fafc;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - SIA KASIR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    * {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #eef2ff;
+      /* solid indigo-50 */
+      min-height: 100vh;
+    }
+
+    /* === Card === */
+    .login-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 20px 40px -15px rgba(55, 48, 163, 0.18);
+      border-radius: 1.25rem;
+      overflow: hidden;
+    }
+
+    /* === Left panel (solid indigo) === */
+    .left-panel {
+      background-color: #4f46e5;
+      /* solid indigo-600 */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      background: #6366f1;
+      /* indigo-500 */
+      border-radius: 50%;
+      top: -60px;
+      right: -60px;
+      opacity: 0.7;
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      background: #4338ca;
+      /* indigo-700 */
+      border-radius: 50%;
+      bottom: -40px;
+      left: -40px;
+      opacity: 0.7;
+    }
+
+    .left-panel>* {
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-icon {
+      width: 80px;
+      height: 80px;
+      background-color: #4338ca;
+      /* solid indigo-700 */
+      border-radius: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      transition: transform 0.35s ease;
+    }
+
+    .brand-icon:hover {
+      transform: rotate(-8deg) scale(1.05);
+    }
+
+    /* === Input === */
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.75rem;
+      border-radius: 0.6rem;
+      border: 1.5px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 0.9rem;
+      color: #1f2937;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: #4f46e5;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+    }
+
+    .input-field::placeholder {
+      color: #9ca3af;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.95rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+      pointer-events: none;
+    }
+
+    .input-wrapper:focus-within .input-icon {
+      color: #4f46e5;
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .toggle-pass:hover {
+      color: #4f46e5;
+      background: #eef2ff;
+    }
+
+    /* === Checkbox === */
+    .checkbox-custom {
+      appearance: none;
+      width: 1.1rem;
+      height: 1.1rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 0.3rem;
+      background: #ffffff;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .checkbox-custom:checked {
+      background-color: #4f46e5;
+      border-color: #4f46e5;
+    }
+
+    .checkbox-custom:checked::after {
+      content: '\2713';
+      position: absolute;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* === Links === */
+    .link-forgot {
+      color: #4f46e5;
+      font-weight: 500;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    .link-forgot:hover {
+      color: #3730a3;
+      text-decoration: underline;
+    }
+
+    /* === Button (solid) === */
+    .btn-login {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 0.6rem;
+      background-color: #4f46e5;
+      /* solid */
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 16px -4px rgba(79, 70, 229, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-login:hover {
+      background-color: #4338ca;
+      /* indigo-700 */
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px -6px rgba(79, 70, 229, 0.6);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login.loading {
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    /* === Error message === */
+    .error-msg {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 0.6rem;
+      color: #b91c1c;
+      font-size: 0.85rem;
+      font-weight: 500;
+      animation: shake 0.45s ease, fadeIn 0.35s ease;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
       }
-      .login-card {
-        background: #ffffff;
-        border-radius: 2rem;
-        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
+
+      20%,
+      60% {
+        transform: translateX(-6px);
       }
-      .icon-submit{
-        color:yellow;
+
+      40%,
+      80% {
+        transform: translateX(6px);
       }
-      .left-panel {
-        background: linear-gradient(145deg, #f1f5f9 0%, #e9eef3 100%);
-        padding: 2.5rem 1.5rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
       }
-      .right-panel {
-        background: #ffffff;
-        padding: 2.5rem 2rem;
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      .input-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 1rem;
-        pointer-events: none;
-        transition: color 0.2s;
+    }
+
+    /* === Entry animation === */
+    .fade-up {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
       }
-      .input-field {
-        width: 100%;
-        padding: 0.8rem 1rem 0.8rem 2.8rem;
-        background: #f1f5f9;
-        border: 2px solid transparent;
-        border-radius: 1rem;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-        color: #1e293b;
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      .input-field:focus {
-        outline: none;
-        background: #ffffff;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-      }
-      .input-field:focus ~ .input-icon,
-      .input-wrapper:focus-within .input-icon {
-        color: #6366f1;
-      }
-      .input-field::placeholder {
-        color: #94a3b8;
-        font-weight: 400;
-      }
-      .btn-login {
-        background: #1e293b;
-        border: none;
-        padding: 0.8rem;
-        border-radius: 1rem;
-        font-weight: 600;
-        font-size: 1rem;
-        color: white;
-        transition: all 0.2s ease;
-        width: 100%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.6rem;
-      }
-      .btn-login:hover {
-        background: #0f172a;
-        transform: scale(1.01);
-        box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.25);
-      }
-      .btn-login:active {
-        transform: scale(0.97);
-      }
-      .error-msg {
-        background: #fef2f2;
-        border-radius: 1rem;
-        padding: 0.7rem 1.2rem;
-        color: #b91c1c;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
-        border-left: 4px solid #dc2626;
-      }
-      .error-msg i {
-        color: #dc2626;
-        font-size: 1.2rem;
-      }
-      .checkbox-custom {
-        width: 1.1rem;
-        height: 1.1rem;
-        accent-color: #6366f1;
-        border-radius: 0.3rem;
-        cursor: pointer;
-      }
-      .link-forgot {
-        color: #6366f1;
-        font-weight: 500;
-        transition: color 0.2s;
-        text-decoration: none;
-      }
-      .link-forgot:hover {
-        color: #4338ca;
-        text-decoration: underline;
-      }
-      .brand-icon {
-        background: rgba(99, 102, 241, 0.08);
-        width: 100px;
-        height: 100px;
-        border-radius: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-      }
-      .brand-icon i {
-        font-size: 3.8rem;
-        color: #6366f1;
-      }
-      /* responsif */
-      @media (max-width: 768px) {
-        .left-panel {
-          padding: 2rem 1rem;
-          min-height: 180px;
-        }
-        .brand-icon {
-          width: 80px;
-          height: 80px;
-        }
-        .brand-icon i {
-          font-size: 3rem;
-        }
-        .right-panel {
-          padding: 1.8rem 1.2rem;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="min-h-screen flex items-center justify-center p-4">
-      <div class="login-card w-full max-w-4xl grid grid-cols-1 md:grid-cols-5">
-        <!-- LEFT PANEL: Brand -->
-        <div
-          class="left-panel md:col-span-2 flex flex-col items-center justify-center text-center"
-        >
-          <div class="brand-icon">
-            <i class="fa-solid fa-cart-shopping"></i>
-          </div>
-          <h1 class="text-3xl font-extrabold text-gray-800 tracking-wide">
-            SIA KASIR
-          </h1>
-          <p class="text-gray-500 text-sm mt-1 flex items-center gap-1">
-            <i class="fa-regular fa-circle-check text-indigo-400 text-xs"></i>
-            Sistem Informasi Kasir
-          </p>
-          <div class="mt-4 flex items-center gap-2 text-gray-400/40 text-xs">
-            <span class="w-8 h-px bg-gray-300/40"></span>
-            <span>v2.0</span>
-            <span class="w-8 h-px bg-gray-300/40"></span>
-          </div>
+    }
+  </style>
+</head>
+
+<body>
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="login-card w-full max-w-4xl grid grid-cols-1 md:grid-cols-5 fade-up">
+
+      <!-- LEFT PANEL: Brand -->
+      <div class="left-panel md:col-span-2 flex flex-col items-center justify-center text-center p-8 md:p-10">
+        <div class="brand-icon mb-5">
+          <i class="fa-solid fa-cart-shopping"></i>
         </div>
-
-        <!-- RIGHT PANEL: Form -->
-        <div class="right-panel md:col-span-3">
-          <div class="flex items-center gap-2 mb-1">
-            <i
-              class="fa-solid fa-arrow-right-to-bracket text-indigo-600 text-xl"
-            ></i>
-            <h2 class="text-2xl font-extrabold text-gray-800">Login</h2>
-          </div>
-          <p class="text-gray-400 text-sm mb-6">Masuk untuk melanjutkan</p>
-
-          <form method="POST" action="">
-            <!-- Email / Username -->
-            <div class="mb-5">
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                Email / Username
-              </label>
-              <div class="input-wrapper relative">
-                <input
-                  type="text"
-                  name="username"
-                  class="input-field"
-                  placeholder="Masukkan username"
-                  autocomplete="username"
-                  required
-                />
-                <i class="fa-solid fa-user input-icon"></i>
-              </div>
-            </div>
-
-            <!-- Password -->
-            <div class="mb-4">
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                Password
-              </label>
-              <div class="input-wrapper relative">
-                <input
-                  type="password"
-                  name="password"
-                  class="input-field"
-                  placeholder="Masukkan password"
-                  autocomplete="current-password"
-                  required
-                />
-                <i class="fa-solid fa-lock input-icon"></i>
-              </div>
-            </div>
-
-            <!-- Remember & Forgot -->
-            <div
-              class="flex flex-wrap items-center justify-between gap-3 mt-4 mb-6"
-            >
-              <label class="flex items-center gap-2 cursor-pointer select-none">
-                <input type="checkbox" class="checkbox-custom" checked />
-                <span class="text-sm font-medium text-gray-700">
-                  Ingat saya
-                </span>
-              </label>
-              <a href="#" class="link-forgot text-sm flex items-center gap-1">
-                <i class="fa-solid fa-key text-[0.65rem]"></i> Lupa password ?
-              </a>
-            </div>
-
-            <!-- Submit -->
-            <button type="submit" class="btn-login">
-              <i class="icon-submit fa-solid fa-arrow-right-to-bracket"></i> Login
-            </button>
-
-            <!-- Error message (muncul setelah klik) -->
-            <?php if ($error !== ""): ?>
-              <div class="error-msg mt-5">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span><?= htmlspecialchars($error) ?></span>
-              </div>
-            <?php endif; ?>
-
-            <!-- footer kecil -->
-            <p
-              class="text-center text-gray-400 text-[0.7rem] mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2"
-            >
-              <i class="fa-regular fa-copyright"></i> 2026 • SIA KASIR
-            </p>
-          </form>
+        <h1 class="text-3xl font-extrabold text-white tracking-wide">SISTEM KASIR</h1>
+        <p class="text-indigo-100 text-sm mt-2 flex items-center gap-1.5">
+          <i class="fa-regular fa-circle-check"></i>
+          Sistem Informasi Kasir
+        </p>
+        <div class="mt-6 flex items-center gap-2 text-indigo-300 text-xs">
         </div>
       </div>
+
+      <!-- RIGHT PANEL: Form -->
+      <div class="md:col-span-3 p-8 md:p-10">
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-arrow-right-to-bracket text-indigo-600 text-xl"></i>
+          <h2 class="text-2xl font-extrabold text-gray-800">Login</h2>
+        </div>
+        <p class="text-gray-400 text-sm mb-6">Masuk untuk melanjutkan</p>
+
+        <form method="POST" action="" id="loginForm">
+          <!-- Username -->
+          <div class="mb-5">
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email / Username</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                name="username"
+                class="input-field"
+                placeholder="Masukkan username"
+                autocomplete="username"
+                required />
+              <i class="fa-solid fa-user input-icon"></i>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                name="password"
+                id="password"
+                class="input-field"
+                style="padding-right:2.75rem;"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+                required />
+              <i class="fa-solid fa-lock input-icon"></i>
+              <span class="toggle-pass" id="togglePass" title="Tampilkan password">
+                <i class="fa-solid fa-eye"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Remember & Forgot -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mt-4 mb-6">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" class="checkbox-custom" checked />
+              <span class="text-sm font-medium text-gray-700">Ingat saya</span>
+            </label>
+            <a href="#" class="link-forgot text-sm flex items-center gap-1">
+              <i class="fa-solid fa-key text-[0.65rem]"></i> Lupa password?
+            </a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-login" id="btnLogin">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Login</span>
+          </button>
+
+          <!-- Error message -->
+          <?php if ($error !== ""): ?>
+            <div class="error-msg mt-5">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span><?= htmlspecialchars($error) ?></span>
+            </div>
+          <?php endif; ?>
+
+          <!-- Footer -->
+          <p class="text-center text-gray-400 text-[0.7rem] mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2">
+            <i class="fa-regular fa-copyright"></i> 2026 • SISTEM INFORMASI KASIR
+          </p>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <script>
-      function showError() {
-        const err = document.getElementById("errorMessage");
-        if (err) {
-          err.classList.remove("hidden");
-          err.style.opacity = "0";
-          setTimeout(() => (err.style.opacity = "1"), 20);
-        }
-      }
+  <script>
+    // Toggle password visibility
+    const togglePass = document.getElementById('togglePass');
+    const passwordInput = document.getElementById('password');
+    togglePass?.addEventListener('click', () => {
+      const isPass = passwordInput.type === 'password';
+      passwordInput.type = isPass ? 'text' : 'password';
+      togglePass.innerHTML = isPass ?
+        '<i class="fa-solid fa-eye-slash"></i>' :
+        '<i class="fa-solid fa-eye"></i>';
+    });
 
-      document
-        .querySelector(".link-forgot")
-        ?.addEventListener("click", function (e) {
-          e.preventDefault();
-          alert("🔐 Demo: reset password akan dikirim ke email terdaftar.");
-        });
-    </script>
-  </body>
+    // Forgot password (demo)
+    document.querySelector('.link-forgot')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('🔐 Demo: reset password akan dikirim ke email terdaftar.');
+    });
+
+    // Loading state saat submit
+    document.getElementById('loginForm')?.addEventListener('submit', () => {
+      const btn = document.getElementById('btnLogin');
+      btn.classList.add('loading');
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Memproses...</span>';
+    });
+  </script>
+</body>
+
 </html>
