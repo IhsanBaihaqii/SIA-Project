@@ -2,7 +2,7 @@
     <div class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
         <span class="flex items-center gap-1.5">
             <i class="fas fa-store text-blue-600 text-xs" aria-hidden="true"></i>
-            <span class="font-medium text-gray-700">&copy; <?= date('Y') ?> SIA KASIR</span>
+            <span class="font-medium text-gray-700">&copy; <?= date('Y') ?> SISTEM KASIR</span>
         </span>
         <span class="hidden sm:inline text-gray-300">•</span>
         <span>Sistem Informasi Kasir</span>

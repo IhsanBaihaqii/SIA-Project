@@ -28,7 +28,7 @@ if (!$trx) {
 $stmt = $pdo->prepare("
     SELECT d.*, pr.nama AS nama_produk, pr.kategori
     FROM tbl_transaction_details d
-    JOIN tbl_products pr ON pr.id_product = d.id_product
+    JOIN tbl_products pr ON pr.kode_produk = d.kode_produk
     WHERE d.id_transaction = :id
 ");
 $stmt->execute([':id' => $id]);
@@ -74,15 +74,15 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </thead>
         <tbody class="divide-y divide-gray-100">
             <?php foreach ($items as $it): ?>
-            <tr>
-                <td class="px-4 py-3">
-                    <p class="font-medium text-gray-800"><?= bersih($it['nama_produk']) ?></p>
-                    <p class="text-xs text-gray-500"><?= bersih($it['kategori']) ?></p>
-                </td>
-                <td class="px-4 py-3 text-center"><?= (int)$it['qty'] ?></td>
-                <td class="px-4 py-3 text-right"><?= rupiah($it['harga']) ?></td>
-                <td class="px-4 py-3 text-right font-medium text-blue-600"><?= rupiah($it['subtotal']) ?></td>
-            </tr>
+                <tr>
+                    <td class="px-4 py-3">
+                        <p class="font-medium text-gray-800"><?= bersih($it['nama_produk']) ?></p>
+                        <p class="text-xs text-gray-500"><?= bersih($it['kategori']) ?></p>
+                    </td>
+                    <td class="px-4 py-3 text-center"><?= (int)$it['qty'] ?></td>
+                    <td class="px-4 py-3 text-right"><?= rupiah($it['harga']) ?></td>
+                    <td class="px-4 py-3 text-right font-medium text-blue-600"><?= rupiah($it['subtotal']) ?></td>
+                </tr>
             <?php endforeach; ?>
         </tbody>
         <tfoot class="bg-gray-50 border-t border-gray-200">

@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - SIA KASIR</title>
+  <title>Login - KASIR</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -340,7 +340,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h1 class="text-3xl font-extrabold text-white tracking-wide">SISTEM KASIR</h1>
         <p class="text-indigo-100 text-sm mt-2 flex items-center gap-1.5">
           <i class="fa-regular fa-circle-check"></i>
-          Sistem Informasi Kasir
+          Toko ATK Maju Jaya
         </p>
         <div class="mt-6 flex items-center gap-2 text-indigo-300 text-xs">
         </div>
@@ -417,7 +417,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
           <!-- Footer -->
           <p class="text-center text-gray-400 text-[0.7rem] mt-6 pt-4 border-t border-gray-100 flex items-center justify-center gap-2">
-            <i class="fa-regular fa-copyright"></i> 2026 • SISTEM INFORMASI KASIR
+            <i class="fa-regular fa-copyright"></i>Toko ATK Maju Jaya
           </p>
         </form>
       </div>

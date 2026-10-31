@@ -38,7 +38,7 @@ $initial  = strtoupper(mb_substr($username, 0, 1));
             <span class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center mr-2.5 shadow-md shadow-blue-600/25">
                 <i class="fas fa-store text-white text-sm" aria-hidden="true"></i>
             </span>
-            <span>SIA KASIR</span>
+            <span>SISTEM KASIR</span>
         </h1>
     </div>
 
@@ -121,69 +121,18 @@ $initial  = strtoupper(mb_substr($username, 0, 1));
                 </a>
             </li>
 
-            <!-- Laporan (dropdown) -->
             <li>
-                <button type="button" id="btn-laporan"
-                    aria-expanded="<?= $is_laporan_sub ? 'true' : 'false' ?>"
-                    aria-controls="menu-laporan"
-                    title="Laporan"
-                    class="relative w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors duration-150
-                        <?= $is_laporan
-                            ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/25'
-                            : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700' ?>">
-                    <?php if ($is_laporan): ?>
+                <a href="../laporan/index.php" title="Laporan"
+                    class="relative flex items-center px-3 py-2.5 rounded-lg transition-colors duration-150
+                   <?= $is('laporan')
+                        ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/25'
+                        : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700' ?>">
+                    <?php if ($is('laporan')): ?>
                         <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r"></span>
                     <?php endif; ?>
-                    <span class="flex items-center">
-                        <i class="fas fa-newspaper w-5 h-5 mr-3 text-center" aria-hidden="true"></i>
-                        <span>Laporan</span>
-                    </span>
-                    <i id="chevron-laporan"
-                        class="fas fa-chevron-down text-xs transition-transform duration-300 <?= $is_laporan_sub ? 'rotate-180' : '' ?>"
-                        aria-hidden="true"></i>
-                </button>
-
-                <!-- Submenu -->
-                <div id="menu-laporan" class="submenu <?= $is_laporan_sub ? 'open' : '' ?>">
-                    <div class="overflow-hidden">
-                        <ul class="mt-1 ml-3 space-y-1 border-l border-gray-200 pl-3">
-
-                            <li>
-                                <a href="../laporan/journal_umum.php" title="Jurnal Umum"
-                                    class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150
-                                   <?= $current_file === 'journal_umum.php'
-                                        ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600'
-                                        : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700' ?>">
-                                    <i class="fas fa-book w-4 h-4 mr-3 text-center" aria-hidden="true"></i>
-                                    <span>Jurnal Umum</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="../laporan/buku_besar.php" title="Buku Besar"
-                                    class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150
-                                   <?= $current_file === 'buku_besar.php'
-                                        ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600'
-                                        : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700' ?>">
-                                    <i class="fas fa-book-open w-4 h-4 mr-3 text-center" aria-hidden="true"></i>
-                                    <span>Buku Besar</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="../laporan/neraca_saldo.php" title="Neraca Saldo"
-                                    class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150
-                                   <?= $current_file === 'neraca_saldo.php'
-                                        ? 'bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-600'
-                                        : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700' ?>">
-                                    <i class="fas fa-scale-balanced w-4 h-4 mr-3 text-center" aria-hidden="true"></i>
-                                    <span>Neraca Saldo</span>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
-                </div>
+                    <i class="fas fa-receipt w-5 h-5 mr-3 text-center" aria-hidden="true"></i>
+                    <span>Laporan</span>
+                </a>
             </li>
 
         </ul>

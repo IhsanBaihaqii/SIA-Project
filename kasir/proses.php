@@ -11,7 +11,7 @@ $bayar        = (int)($_POST['bayar'] ?? 0);
 $cartJson     = $_POST['cart'] ?? '[]';
 $cart         = json_decode($cartJson, true);
 
-// ============ VALIDASI ============
+// ============ VALIDASI DASAR ============
 if (empty($cart) || !is_array($cart)) {
     header("Location: index.php?error=" . urlencode('Keranjang kosong.'));
     exit;
@@ -24,29 +24,31 @@ try {
     $totalHpp       = 0;
     $itemsFinal     = [];
 
-    // ============ 1. KUNCI & VALIDASI SETIAP PRODUK ============
+    // ============ 1. VALIDASI & LOCK PRODUK ============
     foreach ($cart as $item) {
-        $id_product = (int)($item['id_product'] ?? 0);
-        $qty        = (int)($item['qty'] ?? 0);
+        // ✓ FIX: pakai kode_produk (string), BUKAN id_product (int)
+        $kode_produk = trim($item['kode_produk'] ?? '');
+        $qty         = (int)($item['qty'] ?? 0);
 
-        if ($id_product < 1 || $qty < 1) {
+        if ($kode_produk === '' || $qty < 1) {
             throw new Exception('Data keranjang tidak valid.');
         }
 
-        // Lock row produk
-        $stmt = $pdo->prepare("SELECT * FROM tbl_products WHERE id_product = :id FOR UPDATE");
-        $stmt->execute([':id' => $id_product]);
+        // ✓ FIX: kolom kode_produk
+        $stmt = $pdo->prepare("SELECT * FROM tbl_products WHERE kode_produk = :kode FOR UPDATE");
+        $stmt->execute([':kode' => $kode_produk]);
         $produk = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$produk) {
-            throw new Exception("Produk ID $id_product tidak ditemukan.");
+            throw new Exception("Produk '$kode_produk' tidak ditemukan.");
         }
         if ($qty > $produk['stok']) {
             throw new Exception("Stok {$produk['nama']} tidak mencukupi (tersisa {$produk['stok']}).");
         }
 
+        // ✓ FIX: harga dari DB (bukan dari client) → aman dari manipulasi
         $harga       = (int)$produk['harga'];
-        $harga_pokok = (int)($produk['harga_pokok'] ?? 0);
+        $harga_pokok = (int)$produk['harga_pokok'];
         $subtotal    = $harga * $qty;
         $hpp         = $harga_pokok * $qty;
 
@@ -54,10 +56,10 @@ try {
         $totalHpp       += $hpp;
 
         $itemsFinal[] = [
-            'id_product' => $id_product,
-            'harga'      => $harga,
-            'qty'        => $qty,
-            'subtotal'   => $subtotal,
+            'kode_produk' => $kode_produk,
+            'harga'       => $harga,
+            'qty'         => $qty,
+            'subtotal'    => $subtotal,
         ];
     }
 
@@ -76,16 +78,17 @@ try {
     $id_transaction = (int)$pdo->lastInsertId();
 
     // ============ 4. INSERT DETAIL & UPDATE STOK ============
+    // ✓ FIX: kolom kode_produk (bukan id_product)
     $stmtDetail = $pdo->prepare("INSERT INTO tbl_transaction_details
-                                 (id_product, id_transaction, harga, qty, subtotal)
-                                 VALUES (:id_product, :id_transaction, :harga, :qty, :subtotal)");
+                                 (kode_produk, id_transaction, harga, qty, subtotal)
+                                 VALUES (:kode_produk, :id_transaction, :harga, :qty, :subtotal)");
     $stmtStok   = $pdo->prepare("UPDATE tbl_products
                                  SET stok = stok - :qty
-                                 WHERE id_product = :id");
+                                 WHERE kode_produk = :kode");
 
     foreach ($itemsFinal as $it) {
         $stmtDetail->execute([
-            ':id_product'     => $it['id_product'],
+            ':kode_produk'    => $it['kode_produk'],
             ':id_transaction' => $id_transaction,
             ':harga'          => $it['harga'],
             ':qty'            => $it['qty'],
@@ -93,54 +96,13 @@ try {
         ]);
 
         $stmtStok->execute([
-            ':qty' => $it['qty'],
-            ':id'  => $it['id_product'],
+            ':qty'  => $it['qty'],
+            ':kode' => $it['kode_produk'],
         ]);
     }
-
-    // ============ 5. AUTO JURNAL ============
-    // Kas                    (D)  totalTransaksi
-    // Penjualan              (K)  totalTransaksi
-    // Harga Pokok Penjualan  (D)  totalHpp
-    // Persediaan             (K)  totalHpp
-
-    $cariAkun = $pdo->prepare("SELECT id_akun FROM tbl_akun WHERE nama_akun = :n LIMIT 1");
-    $getIdAkun = function ($nama) use ($cariAkun) {
-        $cariAkun->execute([':n' => $nama]);
-        $id = $cariAkun->fetchColumn();
-        if (!$id) {
-            throw new Exception("Akun '$nama' belum ada di tbl_akun.");
-        }
-        return (int)$id;
-    };
-
-    $id_kas        = $getIdAkun('Kas');
-    $id_penjualan  = $getIdAkun('Pendapatan Penjualan');
 
     $no_bukti   = 'TRX-' . str_pad($id_transaction, 5, '0', STR_PAD_LEFT);
     $keterangan = 'Penjualan kasir #' . $id_transaction;
-
-    $stmtJurnal = $pdo->prepare(
-        "INSERT INTO tbl_journal
-            (no_bukti, tanggal, keterangan, id_akun, debit, kredit)
-         VALUES
-            (:no_bukti, NOW(), :keterangan, :id_akun, :debit, :kredit)"
-    );
-
-    $jurnal = [
-        [$id_kas,        $totalTransaksi, 0],
-        [$id_penjualan,  0,               $totalTransaksi],
-    ];
-
-    foreach ($jurnal as $j) {
-        $stmtJurnal->execute([
-            ':no_bukti'   => $no_bukti,
-            ':keterangan' => $keterangan,
-            ':id_akun'    => $j[0],
-            ':debit'      => $j[1],
-            ':kredit'     => $j[2],
-        ]);
-    }
 
     $pdo->commit();
 

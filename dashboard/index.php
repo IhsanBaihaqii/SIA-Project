@@ -42,7 +42,7 @@ $STOK_MINIMAL = 10;
 
 // Stok habis (stok = 0)
 $stok_habis = $pdo->query("
-    SELECT id_product, nama, stok
+    SELECT kode_produk, nama, stok
     FROM tbl_products
     WHERE stok = 0
     ORDER BY nama ASC
@@ -51,7 +51,7 @@ $stok_habis = $pdo->query("
 
 // Stok menipis (0 < stok <= 10)
 $stmt = $pdo->prepare("
-    SELECT id_product, nama, stok
+    SELECT kode_produk, nama, stok
     FROM tbl_products
     WHERE stok > 0 AND stok <= :minimal
     ORDER BY stok ASC

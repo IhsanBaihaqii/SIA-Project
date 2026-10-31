@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$db_name = "db_sia";
+$db_name = "db_kasir_atk";
 $username = "root";
 $password = "";
 
@@ -13,8 +13,6 @@ try {
   );
 
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 } catch (PDOException $error) {
   die("Koneksi database gagal: " . $error->getMessage());
 }
-

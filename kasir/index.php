@@ -16,7 +16,7 @@ include '../layouts/sidebar.php';
 include '../layouts/navbar.php';
 ?>
 
-<main class="md:ml-64 pt-16 min-h-screen bg-gray-50 p-6">
+<main class="md:ml-64 pt-16 min-h-screen bg-[#eef2ff] p-6">
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Kasir</h1>
@@ -25,19 +25,26 @@ include '../layouts/navbar.php';
 
     <!-- Notifikasi -->
     <?php if ($success): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-            <i class="fas fa-check-circle mr-2"></i> Transaksi berhasil. Stok & jurnal telah diperbarui.
+        <div class="flex items-center gap-3 bg-green-50 border border-green-200 border-l-4 border-l-green-500 text-green-700 px-4 py-3 rounded-lg mb-4 shadow-sm">
+            <i class="fa-solid fa-circle-check text-green-500" aria-hidden="true"></i>
+            <span class="text-sm font-medium">Transaksi berhasil. Stok & jurnal telah diperbarui.</span>
+            <button onclick="this.parentElement.remove()" class="ml-auto text-green-500 hover:text-green-700">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
         </div>
     <?php endif; ?>
     <?php if ($error): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?= bersih($error) ?>
+        <div class="flex items-center gap-3 bg-red-50 border border-red-200 border-l-4 border-l-red-500 text-red-700 px-4 py-3 rounded-lg mb-4 shadow-sm">
+            <i class="fa-solid fa-circle-exclamation text-red-500" aria-hidden="true"></i>
+            <span class="text-sm font-medium"><?= bersih($error) ?></span>
+            <button onclick="this.parentElement.remove()" class="ml-auto text-red-500 hover:text-red-700">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
         </div>
     <?php endif; ?>
 
-    <!-- Grid dua kolom -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <!-- Kolom Kiri -->
+        <!-- KOLOM KIRI -->
         <div class="lg:col-span-3 space-y-6">
 
             <!-- Tambah ke Keranjang -->
@@ -49,11 +56,12 @@ include '../layouts/navbar.php';
                         <select id="selectProduk" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                             <option value="">-- Pilih Produk --</option>
                             <?php foreach ($produk as $p): ?>
-                                <option value="<?= $p['id_product'] ?>"
-                                        data-nama="<?= bersih($p['nama']) ?>"
-                                        data-harga="<?= (int)$p['harga'] ?>"
-                                        data-stok="<?= (int)$p['stok'] ?>">
-                                    <?= bersih($p['nama']) ?> — <?= rupiah($p['harga']) ?> (stok: <?= $p['stok'] ?>)
+                                <option value="<?= htmlspecialchars($p['kode_produk']) ?>"
+                                    data-nama="<?= bersih($p['nama']) ?>"
+                                    data-harga="<?= (int)$p['harga'] ?>"
+                                    data-stok="<?= (int)$p['stok'] ?>"
+                                    data-satuan="<?= bersih($p['satuan']) ?>">
+                                    <?= bersih($p['nama']) ?> — <?= rupiah($p['harga']) ?> (stok: <?= $p['stok'] ?> <?= bersih($p['satuan']) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -61,24 +69,24 @@ include '../layouts/navbar.php';
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
                         <input type="number" id="inputQty" value="1" min="1"
-                               class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
                     <div class="flex items-end">
                         <button type="button" onclick="tambahKeKeranjang()"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cart-plus"></i> Tambah
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Tambah
                         </button>
                     </div>
                 </div>
 
-                <!-- Produk populer / cepat -->
+                <!-- Pilih cepat -->
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <p class="text-xs text-gray-400 mb-2">Pilih cepat:</p>
                     <div class="flex flex-wrap gap-2">
                         <?php foreach (array_slice($produk, 0, 5) as $p): ?>
                             <button type="button"
-                                    onclick="pilihCepat(<?= $p['id_product'] ?>)"
-                                    class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors">
+                                onclick="pilihCepat('<?= htmlspecialchars($p['kode_produk'], ENT_QUOTES) ?>')"
+                                class="px-3 py-1 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 rounded-full text-xs text-gray-700 transition-colors">
                                 <?= bersih($p['nama']) ?>
                             </button>
                         <?php endforeach; ?>
@@ -105,7 +113,7 @@ include '../layouts/navbar.php';
                         <tbody id="cartBody" class="divide-y divide-gray-100">
                             <tr id="cartEmpty">
                                 <td colspan="4" class="px-6 py-8 text-center text-gray-400">
-                                    <i class="fas fa-shopping-cart text-2xl mb-2 block"></i>
+                                    <i class="fas fa-shopping-cart text-2xl mb-2 block" aria-hidden="true"></i>
                                     Keranjang masih kosong
                                 </td>
                             </tr>
@@ -115,7 +123,7 @@ include '../layouts/navbar.php';
             </div>
         </div>
 
-        <!-- Kolom Kanan -->
+        <!-- KOLOM KANAN -->
         <div class="lg:col-span-2 space-y-6">
 
             <!-- Ringkasan -->
@@ -144,7 +152,7 @@ include '../layouts/navbar.php';
                         <select name="id_pelanggan" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                             <option value="">-- Umum (Non-member) --</option>
                             <?php foreach ($pelanggan as $p): ?>
-                                <option value="<?= $p['id_pelanggan'] ?>"><?= bersih($p['nama']) ?></option>
+                                <option value="<?= (int)$p['id_pelanggan'] ?>"><?= bersih($p['nama']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -154,8 +162,8 @@ include '../layouts/navbar.php';
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                             <input type="number" name="bayar" id="inputBayar" min="0" placeholder="0"
-                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                                   oninput="hitungKembalian()">
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                oninput="hitungKembalian()">
                         </div>
                     </div>
 
@@ -167,8 +175,8 @@ include '../layouts/navbar.php';
                     </div>
 
                     <button type="submit" id="btnProses"
-                            class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold shadow-sm transition-colors flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check"></i> Proses Transaksi
+                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold shadow-md shadow-blue-600/25 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i> Proses Transaksi
                     </button>
                 </div>
             </form>
@@ -177,125 +185,134 @@ include '../layouts/navbar.php';
 </main>
 
 <script>
-// ============ STATE CART ============
-let cart = [];  // { id_product, nama, harga, stok, qty, subtotal }
+    // ============ STATE ============
+    let cart = []; // { kode_produk: string, nama, harga, stok, satuan, qty, subtotal }
 
-// ============ HELPERS ============
-function formatRupiah(angka) {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
-}
-
-function tambahKeKeranjang() {
-    const select = document.getElementById('selectProduk');
-    const qty    = parseInt(document.getElementById('inputQty').value) || 0;
-
-    if (!select.value) { alert('Pilih produk dulu.'); return; }
-    if (qty < 1)       { alert('Jumlah minimal 1.'); return; }
-
-    const opt     = select.options[select.selectedIndex];
-    const id      = parseInt(select.value);
-    const nama    = opt.dataset.nama;
-    const harga   = parseInt(opt.dataset.harga);
-    const stok    = parseInt(opt.dataset.stok);
-
-    // Cek jika sudah ada di cart
-    const existing = cart.find(i => i.id_product === id);
-    const totalQty = (existing ? existing.qty : 0) + qty;
-
-    if (totalQty > stok) {
-        alert('Stok tidak mencukupi. Stok tersedia: ' + stok);
-        return;
+    // ============ HELPERS ============
+    function formatRupiah(angka) {
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
     }
 
-    if (existing) {
-        existing.qty = totalQty;
-        existing.subtotal = existing.qty * existing.harga;
-    } else {
-        cart.push({ id_product: id, nama, harga, stok, qty, subtotal: harga * qty });
+    function tambahKeKeranjang() {
+        const select = document.getElementById('selectProduk');
+        const qty = parseInt(document.getElementById('inputQty').value) || 0;
+
+        if (!select.value) {
+            alert('Pilih produk dulu.');
+            return;
+        }
+        if (qty < 1) {
+            alert('Jumlah minimal 1.');
+            return;
+        }
+
+        const opt = select.options[select.selectedIndex];
+        const kode = select.value; // ← STRING, jangan parseInt!
+        const nama = opt.dataset.nama;
+        const harga = parseInt(opt.dataset.harga);
+        const stok = parseInt(opt.dataset.stok);
+        const satuan = opt.dataset.satuan;
+
+        // Cek stok
+        const existing = cart.find(i => i.kode_produk === kode);
+        const totalQty = (existing ? existing.qty : 0) + qty;
+
+        if (totalQty > stok) {
+            alert('Stok tidak mencukupi. Stok tersedia: ' + stok + ' ' + satuan);
+            return;
+        }
+
+        if (existing) {
+            existing.qty = totalQty;
+            existing.subtotal = existing.qty * existing.harga;
+        } else {
+            cart.push({
+                kode_produk: kode,
+                nama,
+                harga,
+                stok,
+                satuan,
+                qty,
+                subtotal: harga * qty
+            });
+        }
+
+        select.value = '';
+        document.getElementById('inputQty').value = 1;
+        renderCart();
     }
 
-    // Reset input
-    select.value = '';
-    document.getElementById('inputQty').value = 1;
+    function pilihCepat(kode) {
+        document.getElementById('selectProduk').value = kode;
+        document.getElementById('inputQty').focus();
+    }
 
-    renderCart();
-}
+    function hapusItem(kode) {
+        cart = cart.filter(i => i.kode_produk !== kode);
+        renderCart();
+    }
 
-function pilihCepat(id) {
-    document.getElementById('selectProduk').value = id;
-    document.getElementById('inputQty').focus();
-}
+    function renderCart() {
+        const tbody = document.getElementById('cartBody');
 
-function hapusItem(id) {
-    cart = cart.filter(i => i.id_product !== id);
-    renderCart();
-}
-
-function renderCart() {
-    const tbody = document.getElementById('cartBody');
-
-    if (cart.length === 0) {
-        tbody.innerHTML = `
+        if (cart.length === 0) {
+            tbody.innerHTML = `
             <tr>
                 <td colspan="4" class="px-6 py-8 text-center text-gray-400">
                     <i class="fas fa-shopping-cart text-2xl mb-2 block"></i>
                     Keranjang masih kosong
                 </td>
             </tr>`;
-    } else {
-        tbody.innerHTML = cart.map(item => `
+        } else {
+            tbody.innerHTML = cart.map(item => `
             <tr>
                 <td class="px-6 py-4">${item.nama}</td>
-                <td class="px-6 py-4 text-center">${item.qty}</td>
+                <td class="px-6 py-4 text-center">${item.qty} ${item.satuan}</td>
                 <td class="px-6 py-4 text-right font-medium text-blue-600">${formatRupiah(item.subtotal)}</td>
                 <td class="px-6 py-4 text-center">
-                    <button type="button" onclick="hapusItem(${item.id_product})"
-                            class="text-red-500 hover:text-red-700 transition-colors">
+                    <button type="button" onclick="hapusItem('${item.kode_produk.replace(/'/g, "\\'")}')"
+                            class="text-red-500 hover:text-red-700 transition-colors" title="Hapus">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </td>
             </tr>
         `).join('');
+        }
+
+        const total = cart.reduce((sum, i) => sum + i.subtotal, 0);
+        const itemCount = cart.reduce((sum, i) => sum + i.qty, 0);
+
+        document.getElementById('cartCount').textContent = itemCount + ' item';
+        document.getElementById('ringkasanSubtotal').textContent = formatRupiah(total);
+        document.getElementById('ringkasanTotal').textContent = formatRupiah(total);
+        document.getElementById('inputCart').value = JSON.stringify(cart);
+        hitungKembalian();
     }
 
-    const total     = cart.reduce((sum, i) => sum + i.subtotal, 0);
-    const itemCount = cart.reduce((sum, i) => sum + i.qty, 0);
-
-    document.getElementById('cartCount').textContent         = itemCount + ' item';
-    document.getElementById('ringkasanSubtotal').textContent = formatRupiah(total);
-    document.getElementById('ringkasanTotal').textContent    = formatRupiah(total);
-    document.getElementById('inputCart').value               = JSON.stringify(cart);
-
-    hitungKembalian();
-}
-
-function hitungKembalian() {
-    const total = cart.reduce((sum, i) => sum + i.subtotal, 0);
-    const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
-    const kembali = bayar - total;
-
-    document.getElementById('infoKembalian').textContent =
-        formatRupiah(kembali >= 0 ? kembali : 0);
-}
-
-// ============ SUBMIT ============
-document.getElementById('formTransaksi').addEventListener('submit', function(e) {
-    if (cart.length === 0) {
-        e.preventDefault();
-        alert('Keranjang masih kosong.');
-        return;
+    function hitungKembalian() {
+        const total = cart.reduce((sum, i) => sum + i.subtotal, 0);
+        const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
+        const kembali = bayar - total;
+        document.getElementById('infoKembalian').textContent =
+            formatRupiah(kembali >= 0 ? kembali : 0);
     }
-    const total = cart.reduce((sum, i) => sum + i.subtotal, 0);
-    const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
-    if (bayar < total) {
-        e.preventDefault();
-        alert('Uang dibayar kurang dari total.');
-        return;
-    }
-});
 
-// Init
-renderCart();
+    // ============ SUBMIT ============
+    document.getElementById('formTransaksi').addEventListener('submit', function(e) {
+        if (cart.length === 0) {
+            e.preventDefault();
+            alert('Keranjang masih kosong.');
+            return;
+        }
+        const total = cart.reduce((sum, i) => sum + i.subtotal, 0);
+        const bayar = parseInt(document.getElementById('inputBayar').value) || 0;
+        if (bayar < total) {
+            e.preventDefault();
+            alert('Uang dibayar kurang dari total.');
+        }
+    });
+
+    renderCart();
 </script>
 
 <?php include '../layouts/footer.php'; ?>

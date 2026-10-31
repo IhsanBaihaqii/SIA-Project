@@ -9,21 +9,10 @@ $page_map = [
     'pelanggan' => 'Pelanggan',
     'produk'    => 'Produk',
     'transaksi' => 'Transaksi',
-    'laporan'   => 'Laporan',
+    'laporan' => 'Laporan',
 ];
 
 $page = $page_map[$current_dir] ?? 'Dashboard';
-
-// Subjudul khusus halaman laporan
-if ($current_dir === 'laporan') {
-    $sub_map = [
-        'index.php'         => 'Laporan',
-        'journal_umum.php'  => 'Jurnal Umum',
-        'buku_besar.php'    => 'Buku Besar',
-        'neraca_saldo.php'  => 'Neraca Saldo',
-    ];
-    $page = $sub_map[$current_file] ?? 'Laporan';
-}
 
 // Info user dari session
 $username = $_SESSION['username'] ?? 'Admin';
@@ -42,7 +31,7 @@ $initial  = strtoupper(mb_substr($username, 0, 1));
 
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 leading-tight"><?= htmlspecialchars($page) ?></h2>
-                <p class="text-xs text-gray-400 hidden sm:block">SIA KASIR</p>
+                <p class="text-xs text-gray-400 hidden sm:block">Toko ATK Maju Jaya</p>
             </div>
         </div>
 
