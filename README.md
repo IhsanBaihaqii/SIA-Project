@@ -50,12 +50,6 @@ laporan penjualan melalui satu aplikasi.
 
 ## ✨ Fitur Utama
 
----
-
-Fitur Keterangan
-
----
-
 🔐 Login Autentikasi pengguna sebelum
 mengakses aplikasi.
 
@@ -108,23 +102,17 @@ dengan stok menipis atau habis.
 
 ---
 
-Perangkat lunak Versi minimum Keterangan
-
----
+| Perangkat lunak Versi minimum Keterangan |
+| ---------------------------------------- |
 
 PHP 8.0 (disarankan 8.1+) Wajib mendukung PDO
 MySQL dan session.
-
 MySQL / MariaDB MySQL 8.0 / MariaDB 10.4 Database aplikasi.
-
 Apache / Nginx Apache 2.4+ / Nginx 1.20+ Web server.
-
 Browser Versi terbaru Chrome, Edge, atau
-Firefox.
-
+Firefoxz
 Composer Tidak diperlukan Project menggunakan
-PHP native tanpa
-framework.
+PHP native tanpa framework.
 
 ---
 
@@ -173,16 +161,6 @@ C:\laragon\www\sia-kasir
 ```text
 /var/www/html/sia-kasir
 ```
-
-Jika menggunakan Git:
-
-```bash
-git clone <URL-REPOSITORY>
-```
-
-> Ganti `<URL-REPOSITORY>` dengan alamat repository project. Jika
-> project diperoleh dalam bentuk ZIP, ekstrak file tersebut ke direktori
-> web server.
 
 ### 2. Jalankan Web Server
 
@@ -299,29 +277,15 @@ Setelah Apache, MySQL, dan database siap, buka browser dan akses:
 
 ---
 
-Menu Path Kegunaan
-
----
-
-Login `login.php` Autentikasi pengguna.
-
-Dashboard `dashboard/index.php` Ringkasan statistik,
-grafik 7 hari, dan
-peringatan stok.
-
-Kasir `kasir/index.php` Memproses transaksi
-penjualan.
-
-Produk `produk/index.php` Mengelola data produk.
-
-Pelanggan `pelanggan/index.php` Mengelola data
-pelanggan.
-
-Transaksi `transaksi/index.php` Melihat riwayat dan
-detail transaksi.
-
-Laporan `laporan/index.php` Melihat laporan
-penjualan per periode.
+| Menu      | Path                  | Kegunaan                                                 |
+| --------- | --------------------- | -------------------------------------------------------- |
+| Login     | `login.php`           | Autentikasi pengguna.                                    |
+| Dashboard | `dashboard/index.php` | Ringkasan statistik, grafik 7 hari, dan peringatan stok. |
+| Kasir     | `kasir/index.php`     | Memproses transaksi penjualan.                           |
+| Produk    | `produk/index.php`    | Mengelola data produk.                                   |
+| Pelanggan | `pelanggan/index.php` | Mengelola data pelanggan.                                |
+| Transaksi | `transaksi/index.php` | Melihat riwayat dan detail transaksi.                    |
+| Laporan   | `laporan/index.php`   | Melihat laporanpenjualan per periode.                    |
 
 ---
 
