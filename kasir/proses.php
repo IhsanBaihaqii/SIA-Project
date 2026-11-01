@@ -11,7 +11,7 @@ $bayar        = (int)($_POST['bayar'] ?? 0);
 $cartJson     = $_POST['cart'] ?? '[]';
 $cart         = json_decode($cartJson, true);
 
-// ============ VALIDASI DASAR ============
+//  VALIDASI DASAR 
 if (empty($cart) || !is_array($cart)) {
     header("Location: index.php?error=" . urlencode('Keranjang kosong.'));
     exit;
@@ -24,7 +24,7 @@ try {
     $totalHpp       = 0;
     $itemsFinal     = [];
 
-    // ============ 1. VALIDASI & LOCK PRODUK ============
+    //  1. VALIDASI & LOCK PRODUK 
     foreach ($cart as $item) {
         // ✓ FIX: pakai kode_produk (string), BUKAN id_product (int)
         $kode_produk = trim($item['kode_produk'] ?? '');
@@ -63,12 +63,12 @@ try {
         ];
     }
 
-    // ============ 2. CEK PEMBAYARAN ============
+    //  2. CEK PEMBAYARAN 
     if ($bayar < $totalTransaksi) {
         throw new Exception('Uang dibayar kurang dari total transaksi.');
     }
 
-    // ============ 3. INSERT HEADER TRANSAKSI ============
+    //  3. INSERT HEADER TRANSAKSI 
     $stmt = $pdo->prepare("INSERT INTO tbl_transaction (id_pelanggan, tanggal, total)
                            VALUES (:id_pelanggan, CURDATE(), :total)");
     $stmt->execute([
@@ -77,7 +77,7 @@ try {
     ]);
     $id_transaction = (int)$pdo->lastInsertId();
 
-    // ============ 4. INSERT DETAIL & UPDATE STOK ============
+    //  4. INSERT DETAIL & UPDATE STOK 
     // ✓ FIX: kolom kode_produk (bukan id_product)
     $stmtDetail = $pdo->prepare("INSERT INTO tbl_transaction_details
                                  (kode_produk, id_transaction, harga, qty, subtotal)

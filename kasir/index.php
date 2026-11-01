@@ -185,10 +185,10 @@ include '../layouts/navbar.php';
 </main>
 
 <script>
-    // ============ STATE ============
+    //  STATE 
     let cart = []; // { kode_produk: string, nama, harga, stok, satuan, qty, subtotal }
 
-    // ============ HELPERS ============
+    //  HELPERS 
     function formatRupiah(angka) {
         return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
     }
@@ -297,7 +297,7 @@ include '../layouts/navbar.php';
             formatRupiah(kembali >= 0 ? kembali : 0);
     }
 
-    // ============ SUBMIT ============
+    //  SUBMIT 
     document.getElementById('formTransaksi').addEventListener('submit', function(e) {
         if (cart.length === 0) {
             e.preventDefault();

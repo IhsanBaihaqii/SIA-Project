@@ -2,17 +2,17 @@
 include '../config/koneksi.php';
 include '../includes/helpers.php';
 
-// =========================================================
+// =========
 // 1. STATISTIK CARD
-// =========================================================
+// =========
 $total_produk     = $pdo->query("SELECT COUNT(*) FROM tbl_products")->fetchColumn();
 $total_pelanggan  = $pdo->query("SELECT COUNT(*) FROM tbl_pelanggan")->fetchColumn();
 $total_transaksi  = $pdo->query("SELECT COUNT(*) FROM tbl_transaction")->fetchColumn();
 $total_pendapatan = $pdo->query("SELECT COALESCE(SUM(total), 0) FROM tbl_transaction")->fetchColumn();
 
-// =========================================================
+// =========
 // 2. GRAFIK PENDAPATAN 7 HARI TERAKHIR
-// =========================================================
+// =========
 $sql_grafik = "
     SELECT DATE(tanggal) AS tgl, COALESCE(SUM(total), 0) AS total
     FROM tbl_transaction
@@ -34,9 +34,9 @@ for ($i = 6; $i >= 0; $i--) {
 }
 $max_total = max(array_column($grafik, 'total')) ?: 1;
 
-// =========================================================
+// =========
 // 3. STOK MENIPIS & HABIS
-// =========================================================
+// =========
 // tbl_products TIDAK punya kolom stok_minimal → pakai ambang tetap
 $STOK_MINIMAL = 10;
 
@@ -93,9 +93,7 @@ include '../layouts/navbar.php';
         <p class="text-gray-500 text-sm">Selamat datang kembali! Berikut ringkasan bisnis Anda.</p>
     </div>
 
-    <!-- ========================================================= -->
     <!-- STATISTIK CARDS -->
-    <!-- ========================================================= -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
@@ -147,9 +145,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- GRAFIK + ALERT STOK -->
-    <!-- ========================================================= -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Grafik Pendapatan 7 Hari -->

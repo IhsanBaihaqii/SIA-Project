@@ -2,9 +2,9 @@
 include '../config/koneksi.php';
 include '../includes/helpers.php';
 
-// =========================================================
+// =========
 // 1. FILTER PERIODE
-// =========================================================
+// =========
 $mode = $_GET['mode'] ?? 'bulan';
 if (!in_array($mode, ['7d', 'bulan', 'single', 'range'], true)) {
     $mode = 'bulan';
@@ -41,9 +41,9 @@ if ($mode === '7d') {
 
 $params = [':dari' => $tanggal_mulai, ':ke' => $tanggal_akhir];
 
-// =========================================================
+// =========
 // 2. SUMMARY STATS
-// =========================================================
+// =========
 $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) AS total_transaksi,
@@ -66,9 +66,9 @@ $stmt = $pdo->prepare("
 $stmt->execute($params);
 $total_item = (int)$stmt->fetchColumn();
 
-// =========================================================
+// =========
 // 3. PRODUK TERJUAL (TOP 10)
-// =========================================================
+// =========
 $stmt = $pdo->prepare("
     SELECT 
         p.kode_produk,
@@ -93,9 +93,9 @@ $produk_terjual = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $grafik_produk = array_slice($produk_terjual, 0, 5);
 $max_qty = !empty($grafik_produk) ? max(array_column($grafik_produk, 'total_qty')) : 1;
 
-// =========================================================
+// =========
 // 4. TRANSAKSI TERBARU (10)
-// =========================================================
+// =========
 $stmt = $pdo->prepare("
     SELECT 
         t.id_transaction, 
@@ -112,9 +112,9 @@ $stmt = $pdo->prepare("
 $stmt->execute($params);
 $transaksi_terbaru = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// =========================================================
+// =========
 // 5. GRAFIK PENDAPATAN HARIAN
-// =========================================================
+// =========
 $stmt = $pdo->prepare("
     SELECT DATE(tanggal) AS tgl, COALESCE(SUM(total), 0) AS total
     FROM tbl_transaction
@@ -160,9 +160,7 @@ include '../layouts/navbar.php';
         <p class="text-gray-500 text-sm">Ringkasan pendapatan, produk terjual, dan transaksi.</p>
     </div>
 
-    <!-- ========================================================= -->
     <!-- FILTER PERIODE -->
-    <!-- ========================================================= -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
         <div class="flex flex-wrap items-center gap-2 mb-3">
             <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-2">Periode:</span>
@@ -250,9 +248,7 @@ include '../layouts/navbar.php';
         <?php endif; ?>
     </div>
 
-    <!-- ========================================================= -->
     <!-- SUMMARY CARDS (4) -->
-    <!-- ========================================================= -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
         <!-- Total Pendapatan -->
@@ -316,9 +312,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- GRAFIK PENDAPATAN HARIAN + PRODUK TERJUAL -->
-    <!-- ========================================================= -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         <!-- Grafik Pendapatan -->
@@ -409,9 +403,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- TABEL PRODUK TERJUAL (LENGKAP) -->
-    <!-- ========================================================= -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
@@ -491,9 +483,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- TRANSAKSI TERBARU -->
-    <!-- ========================================================= -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>

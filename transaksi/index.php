@@ -2,7 +2,7 @@
 include '../config/koneksi.php';
 include '../includes/helpers.php';
 
-// ============ FILTER PERIODE ============
+//  FILTER PERIODE 
 $periode_pilihan = [
     'all'     => ['label' => 'Semua',       'sql' => null,                                                         'icon' => 'fa-infinity'],
     '7d'      => ['label' => '7 Hari',      'sql' => 't.tanggal >= CURDATE() - INTERVAL 6 DAY',                    'icon' => 'fa-calendar-day'],
@@ -15,7 +15,7 @@ if (!isset($periode_pilihan[$periode])) {
     $periode = '30d';
 }
 
-// ============ SEARCH & PAGINATION ============
+//  SEARCH & PAGINATION 
 $search  = trim($_GET['q'] ?? '');
 $page    = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
@@ -37,7 +37,7 @@ if ($search !== '') {
 
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// ============ SUMMARY STATS (untuk periode terpilih) ============
+//  SUMMARY STATS (untuk periode terpilih) 
 $sqlStats = "
     SELECT 
         COUNT(*) AS total_trx,
@@ -52,7 +52,7 @@ $stmtStats = $pdo->prepare($sqlStats);
 $stmtStats->execute($params);
 $stats = $stmtStats->fetch(PDO::FETCH_ASSOC);
 
-// ============ HITUNG TOTAL DATA ============
+//  HITUNG TOTAL DATA 
 $stmtCount = $pdo->prepare("
     SELECT COUNT(*) FROM tbl_transaction t
     LEFT JOIN tbl_pelanggan p ON p.id_pelanggan = t.id_pelanggan
@@ -62,7 +62,7 @@ $stmtCount->execute($params);
 $totalData = (int)$stmtCount->fetchColumn();
 $totalPage = max(1, (int)ceil($totalData / $perPage));
 
-// ============ AMBIL DATA ============
+//  AMBIL DATA 
 $sql = "
     SELECT t.id_transaction, t.tanggal, t.total,
            COALESCE(p.nama, 'Umum') AS nama_pelanggan,
@@ -94,7 +94,7 @@ include '../layouts/navbar.php';
 ?>
 
 <main class="md:ml-64 pt-16 min-h-screen bg-[#eef2ff] p-6">
-    <!-- ============ HEADER ============ -->
+    <!--  HEADER  -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Daftar Transaksi</h1>
@@ -106,7 +106,7 @@ include '../layouts/navbar.php';
         </a>
     </div>
 
-    <!-- ============ NOTIFIKASI ============ -->
+    <!--  NOTIFIKASI  -->
     <?php if ($success): ?>
         <div class="flex items-center gap-3 bg-green-50 border border-green-200 border-l-4 border-l-green-500 text-green-700 px-4 py-3 rounded-lg mb-4 shadow-sm">
             <i class="fa-solid fa-circle-check text-green-500" aria-hidden="true"></i>
@@ -126,7 +126,7 @@ include '../layouts/navbar.php';
         </div>
     <?php endif; ?>
 
-    <!-- ============ FILTER PERIODE (TABS) ============ -->
+    <!--  FILTER PERIODE (TABS)  -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-4">
         <div class="flex flex-wrap items-center gap-1">
             <?php foreach ($periode_pilihan as $key => $p):
@@ -144,7 +144,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ============ SUMMARY CARDS ============ -->
+    <!--  SUMMARY CARDS  -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- Total Transaksi -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -209,7 +209,7 @@ include '../layouts/navbar.php';
         </div>
     </div>
 
-    <!-- ============ SEARCH BAR ============ -->
+    <!--  SEARCH BAR  -->
     <form method="GET" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 flex flex-wrap items-center gap-3">
         <input type="hidden" name="periode" value="<?= bersih($periode) ?>">
         <div class="flex-1 min-w-[200px]">
@@ -234,7 +234,7 @@ include '../layouts/navbar.php';
         </div>
     </form>
 
-    <!-- ============ TABEL ============ -->
+    <!--  TABEL  -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
@@ -301,7 +301,7 @@ include '../layouts/navbar.php';
             </table>
         </div>
 
-        <!-- ============ PAGINATION ============ -->
+        <!--  PAGINATION  -->
         <?php if ($totalData > 0): ?>
             <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
                 <span class="text-gray-500">
@@ -352,7 +352,7 @@ include '../layouts/navbar.php';
     </div>
 </main>
 
-<!-- ============ MODAL DETAIL ============ -->
+<!--  MODAL DETAIL  -->
 <div id="modalDetail" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-10 mx-auto p-6 border-0 w-full max-w-2xl shadow-2xl rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
@@ -380,7 +380,7 @@ include '../layouts/navbar.php';
     </div>
 </div>
 
-<!-- ============ MODAL HAPUS ============ -->
+<!--  MODAL HAPUS  -->
 <div id="modalHapus" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-4">
@@ -433,7 +433,7 @@ include '../layouts/navbar.php';
         document.body.style.overflow = '';
     }
 
-    // ============ DETAIL (AJAX) ============
+    //  DETAIL (AJAX) 
     function bukaDetail(id) {
         const content = document.getElementById('detailContent');
         content.innerHTML = `
@@ -459,7 +459,7 @@ include '../layouts/navbar.php';
             });
     }
 
-    // ============ HAPUS ============
+    //  HAPUS 
     function bukaHapus(id, label) {
         document.getElementById('hapusId').value = id;
         document.getElementById('hapusLabel').textContent = label;

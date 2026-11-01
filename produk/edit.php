@@ -1,13 +1,13 @@
 <?php
 include '../config/koneksi.php';
 
-// ============ VALIDASI METHOD ============
+//  VALIDASI METHOD 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit;
 }
 
-// ============ AMBIL & VALIDASI INPUT ============
+//  AMBIL & VALIDASI INPUT 
 $kode     = trim($_POST['kode_produk'] ?? '');
 $nama     = trim($_POST['nama'] ?? '');
 $kategori = trim($_POST['kategori'] ?? '');
@@ -30,7 +30,7 @@ if ($stok < 0) {
 }
 
 try {
-    // ============ CEK PRODUK ADA ============
+    //  CEK PRODUK ADA 
     $cek = $pdo->prepare("SELECT kode_produk FROM tbl_products WHERE kode_produk = :kode LIMIT 1");
     $cek->execute([':kode' => $kode]);
 
@@ -39,7 +39,7 @@ try {
         exit;
     }
 
-    // ============ UPDATE (TANPA harga_pokok) ============
+    //  UPDATE (TANPA harga_pokok) 
     $sql = "UPDATE tbl_products 
             SET nama     = :nama,
                 kategori = :kategori,

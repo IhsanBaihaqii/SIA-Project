@@ -17,7 +17,7 @@ include '../layouts/navbar.php';
 <main class="md:ml-64 pt-16 min-h-screen bg-[#eef2ff]">
     <div class="p-6">
 
-        <!-- ===================== ALERT ===================== -->
+        <!-- ========= ALERT ========= -->
         <?php if ($success): ?>
             <div class="flex items-center gap-3 bg-green-50 border border-green-200 border-l-4 border-l-green-500 text-green-700 px-4 py-3 rounded-lg mb-4 shadow-sm">
                 <i class="fa-solid fa-circle-check text-green-500" aria-hidden="true"></i>
@@ -39,7 +39,7 @@ include '../layouts/navbar.php';
             </div>
         <?php endif; ?>
 
-        <!-- ===================== HEADER ===================== -->
+        <!-- ========= HEADER ========= -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Daftar Produk</h1>
@@ -52,7 +52,7 @@ include '../layouts/navbar.php';
             </button>
         </div>
 
-        <!-- ===================== TABLE ===================== -->
+        <!-- ========= TABLE ========= -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full">
@@ -148,7 +148,7 @@ include '../layouts/navbar.php';
     </div>
 </main>
 
-<!-- ===================== MODAL TAMBAH ===================== -->
+<!-- ========= MODAL TAMBAH ========= -->
 <div id="modalTambah" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-10 sm:top-20 mx-auto p-6 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-5">
@@ -217,7 +217,7 @@ include '../layouts/navbar.php';
     </div>
 </div>
 
-<!-- ===================== MODAL EDIT ===================== -->
+<!-- ========= MODAL EDIT ========= -->
 <div id="modalEdit" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-10 sm:top-20 mx-auto p-6 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-5">
@@ -287,7 +287,7 @@ include '../layouts/navbar.php';
     </div>
 </div>
 
-<!-- ===================== MODAL HAPUS ===================== -->
+<!-- ========= MODAL HAPUS ========= -->
 <div id="modalHapus" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-10 sm:top-20 mx-auto p-6 border-0 w-full max-w-sm shadow-2xl rounded-2xl bg-white">
         <div class="flex justify-between items-center mb-5">
